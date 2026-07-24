@@ -1,6 +1,6 @@
 # 01 - Arcade Vault MVP (Visual Shell)
 
-- **Status:** Draft
+- **Status:** Approved
 - **Dependencies:** None (first spec of the project)
 - **Date:** 2026-07-24
 - **Objective:** Port the 5 screens from the static prototype in `references/templates/` (library, detail, player, auth, and hall of fame) into real Next.js 16 App Router routes with the same retro/neon visual design, mock data, and fake localStorage-based session, without implementing any real game logic.
