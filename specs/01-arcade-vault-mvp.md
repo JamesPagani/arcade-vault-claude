@@ -1,6 +1,6 @@
 # 01 - Arcade Vault MVP (Visual Shell)
 
-- **Status:** Approved
+- **Status:** Implemented
 - **Dependencies:** None (first spec of the project)
 - **Date:** 2026-07-24
 - **Objective:** Port the 5 screens from the static prototype in `references/templates/` (library, detail, player, auth, and hall of fame) into real Next.js 16 App Router routes with the same retro/neon visual design, mock data, and fake localStorage-based session, without implementing any real game logic.
@@ -111,16 +111,16 @@ export interface AuthUser {
 
 ## Acceptance Criteria
 
-- [ ] `/` renders the Library: hero header, search input filters the grid by title, category chips filter by `cat`, and each `GameCard` links to `/juegos/[id]`.
-- [ ] `/juegos/[id]` renders the Game Detail page for every id in `GAMES` (cover, tags, description, stat strip, leaderboard list from `seededScores`), with "Play Now" linking to `/juegos/[id]/jugar` and "Back" linking to `/`. An unknown id returns a 404 (`notFound()`).
-- [ ] `/juegos/[id]/jugar` renders the CRT/arena visual and HUD (player name, score, lives, level), score increases automatically on an interval, "Pause"/"Resume" toggles the tick, "End" opens the game-over modal showing the final score, and saving a score writes an entry to `localStorage` (`av_scores`) and shows the "saved" confirmation state.
-- [ ] `/salon-de-la-fama` renders per-game tabs, switching tabs re-generates the podium (top 3) and table via `seededScores` for that game's id, and shows a highlighted "your score" row only when a user is logged in.
-- [ ] `/iniciar-sesion` lets the user submit sign-in or sign-up forms (any input accepted) or continue as guest, in all cases setting the session and redirecting to `/`.
-- [ ] The Nav (desktop + mobile hamburger) is present on all 5 routes, highlights the active route, and toggles between "Sign In" and the logged-in username with a working sign-out.
-- [ ] A logged-in session persists across a full page reload (via `localStorage` `av_user`) and disappears after sign-out.
-- [ ] Visual output (colors, fonts, spacing, CRT/neon animations, responsive breakpoints) matches the reference templates on both desktop and mobile viewport widths.
-- [ ] No console errors/warnings in the browser on any of the 5 routes during the flows above.
-- [ ] `npm run build` completes with no TypeScript or lint errors.
+- [x] `/` renders the Library: hero header, search input filters the grid by title, category chips filter by `cat`, and each `GameCard` links to `/juegos/[id]`.
+- [x] `/juegos/[id]` renders the Game Detail page for every id in `GAMES` (cover, tags, description, stat strip, leaderboard list from `seededScores`), with "Play Now" linking to `/juegos/[id]/jugar` and "Back" linking to `/`. An unknown id returns a 404 (`notFound()`).
+- [x] `/juegos/[id]/jugar` renders the CRT/arena visual and HUD (player name, score, lives, level), score increases automatically on an interval, "Pause"/"Resume" toggles the tick, "End" opens the game-over modal showing the final score, and saving a score writes an entry to `localStorage` (`av_scores`) and shows the "saved" confirmation state.
+- [x] `/salon-de-la-fama` renders per-game tabs, switching tabs re-generates the podium (top 3) and table via `seededScores` for that game's id, and shows a highlighted "your score" row only when a user is logged in.
+- [x] `/iniciar-sesion` lets the user submit sign-in or sign-up forms (any input accepted) or continue as guest, in all cases setting the session and redirecting to `/`.
+- [x] The Nav (desktop + mobile hamburger) is present on all 5 routes, highlights the active route, and toggles between "Sign In" and the logged-in username with a working sign-out.
+- [x] A logged-in session persists across a full page reload (via `localStorage` `av_user`) and disappears after sign-out.
+- [x] Visual output (colors, fonts, spacing, CRT/neon animations, responsive breakpoints) matches the reference templates on both desktop and mobile viewport widths.
+- [x] No console errors/warnings in the browser on any of the 5 routes during the flows above.
+- [x] `npm run build` completes with no TypeScript or lint errors.
 
 ## Decisions Taken and Discarded
 
