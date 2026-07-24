@@ -35,7 +35,11 @@ export default function RootLayout({
       lang="en"
       className={`${pressStart2P.variable} ${jetBrainsMono.variable} ${courierPrime.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <div className="av-bg" />
+        <div className="av-noise" />
+        <div id="root">{children}</div>
+      </body>
     </html>
   );
 }
