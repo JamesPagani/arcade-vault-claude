@@ -26,7 +26,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
 
   useEffect(() => {
+    // Reads localStorage (unavailable during server render) after mount to avoid a
+    // hydration mismatch; the state is always null on first paint by design.
     try {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setUser(JSON.parse(localStorage.getItem("av_user") || "null"));
     } catch {
       setUser(null);

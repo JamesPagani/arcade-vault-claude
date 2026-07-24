@@ -22,7 +22,12 @@ export function GamePlayer({ game }: { game: Game }) {
   }, [over, paused]);
 
   useEffect(() => {
-    if (score > 0 && score % 2500 < 100) setLevel((l) => l + 1);
+    // Placeholder level-up tick matching the template's fake simulation, not a real
+    // scoring engine — see spec decision to keep the player screen's mock as-is.
+    if (score > 0 && score % 2500 < 100) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setLevel((l) => l + 1);
+    }
   }, [score]);
 
   const endGame = () => setOver(true);
