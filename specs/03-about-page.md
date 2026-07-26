@@ -1,6 +1,6 @@
 # 03 - About Page & Contact Email
 
-- **Status:** Approved
+- **Status:** Implemented
 - **Dependencies:** [02-home-landing-page.md](./02-home-landing-page.md)
 - **Date:** 2026-07-25
 - **Objective:** Port the `/acerca-de` page (mission statement + contact form) from `references/templates/home-about/about.jsx`, wiring the contact form to send an email via Resend.
@@ -77,17 +77,17 @@ CONTACT_EMAIL=jaime.galvez@vibeconsulting.com.co   # fixed destination for conta
 
 ## Acceptance Criteria
 
-- [ ] `/acerca-de` renders the about hero (kicker, title, mission paragraph, 3-item highlight row), the divider banner, and the contact section (intro copy, tips, form) — matching `references/templates/home-about/about.jsx` + `styles.css` visually and structurally.
-- [ ] The divider and contact section fade/animate into view on scroll (via the shared `useReveal` hook), without console errors.
-- [ ] Submitting the form with any empty field, or with a malformed email address, triggers the shake animation and does not send a request to `/api/contacto`.
-- [ ] Submitting the form with valid name, email, and message shows a "sending" state (disabled submit button), then, on success, replaces the form with the "terminal" success screen showing the submitted name — and a real email arrives at the `CONTACT_EMAIL` inbox containing the submitted name, email, and message.
-- [ ] "ENVIAR OTRO MENSAJE" on the success screen resets the form back to its empty, editable state.
-- [ ] If the email fails to send (e.g. invalid `RESEND_API_KEY` or Resend outage), the form shows an inline error message, keeps the user's typed input, and allows retrying submission — the success screen is never shown for a failed send.
-- [ ] `POST /api/contacto` rejects requests with missing/empty fields or an invalid email format with an HTTP 4xx response and `{ ok: false, error: "..." }`, without leaking Resend internals or stack traces.
-- [ ] The Nav (desktop + mobile) shows "Acerca de" as a working link to `/acerca-de`, highlighted as active only on that route; the previous disabled placeholder no longer appears.
-- [ ] Visual output on `/acerca-de` (colors, fonts, spacing, animations, responsive breakpoints) matches `references/templates/home-about/about.jsx` + `styles.css` on desktop and mobile viewport widths.
-- [ ] No console errors/warnings on `/acerca-de` during the flows above.
-- [ ] `npm run build` completes with no TypeScript or lint errors.
+- [x] `/acerca-de` renders the about hero (kicker, title, mission paragraph, 3-item highlight row), the divider banner, and the contact section (intro copy, tips, form) — matching `references/templates/home-about/about.jsx` + `styles.css` visually and structurally.
+- [x] The divider and contact section fade/animate into view on scroll (via the shared `useReveal` hook), without console errors.
+- [x] Submitting the form with any empty field, or with a malformed email address, triggers the shake animation and does not send a request to `/api/contacto`.
+- [x] Submitting the form with valid name, email, and message shows a "sending" state (disabled submit button), then, on success, replaces the form with the "terminal" success screen showing the submitted name — and a real email arrives at the `CONTACT_EMAIL` inbox containing the submitted name, email, and message.
+- [x] "ENVIAR OTRO MENSAJE" on the success screen resets the form back to its empty, editable state.
+- [x] If the email fails to send (e.g. invalid `RESEND_API_KEY` or Resend outage), the form shows an inline error message, keeps the user's typed input, and allows retrying submission — the success screen is never shown for a failed send.
+- [x] `POST /api/contacto` rejects requests with missing/empty fields or an invalid email format with an HTTP 4xx response and `{ ok: false, error: "..." }`, without leaking Resend internals or stack traces.
+- [x] The Nav (desktop + mobile) shows "Acerca de" as a working link to `/acerca-de`, highlighted as active only on that route; the previous disabled placeholder no longer appears.
+- [x] Visual output on `/acerca-de` (colors, fonts, spacing, animations, responsive breakpoints) matches `references/templates/home-about/about.jsx` + `styles.css` on desktop and mobile viewport widths.
+- [x] No console errors/warnings on `/acerca-de` during the flows above.
+- [x] `npm run build` completes with no TypeScript or lint errors.
 
 ## Decisions Taken and Discarded
 
