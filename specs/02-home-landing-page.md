@@ -1,6 +1,6 @@
 # 02 - Home Landing Page & Library Relocation
 
-- **Status:** Approved
+- **Status:** Implemented
 - **Dependencies:** [01-arcade-vault-mvp.md](./01-arcade-vault-mvp.md)
 - **Date:** 2026-07-24
 - **Objective:** Replace the current `/` route (which shows the game library) with a new marketing-style landing page ported from `references/templates/home-about/home.jsx`, and move the existing library page to `/juegos`.
@@ -52,18 +52,18 @@
 
 ## Acceptance Criteria
 
-- [ ] `/` renders the new landing page: hero with floating silhouettes and CTAs, feature grid, games preview rail (first 6 `GAMES`, each linking to `/juegos/[id]`), stats band, activity/leaderboard section, pricing/FAQ section, and final CTA — matching `references/templates/home-about/home.jsx` visually and structurally.
-- [ ] `/juegos` renders exactly what `/` used to render before this spec: hero header, search input, category chips, and game grid linking to `/juegos/[id]`.
-- [ ] `/` no longer shows the library; `/juegos` is the only route showing it.
-- [ ] Scroll-reveal: sections on the new home page fade/animate into view as they cross into the viewport (matching the template's `.reveal`/`.in` behavior), without console errors.
-- [ ] On the new home page, "Explorar Juegos" and "Ver Todos los Juegos" and the final CTA all navigate to `/juegos`; "Crear Cuenta" and the pricing CTA navigate to `/iniciar-sesion`; "Ver Salón →" navigates to `/salon-de-la-fama`; each of the 6 preview game cards navigates to its `/juegos/[id]`.
-- [ ] The Nav (desktop + mobile) shows "Inicio", "Biblioteca", a non-clickable "Acerca de" placeholder, and "Salón de la Fama"; "Inicio" highlights as active on `/`, "Biblioteca" highlights as active on `/juegos` and `/juegos/[id]*`.
-- [ ] The Nav logo click and "Inicio" link both navigate to `/` (the new landing page).
-- [ ] The back button on `/juegos/[id]`, the game-over screen's back-to-library button, and "Volver a Biblioteca" on `/salon-de-la-fama` all navigate to `/juegos` (not `/`).
-- [ ] Signing in, signing up, or continuing as guest on `/iniciar-sesion` redirects to `/juegos` (not `/`).
-- [ ] Visual output on `/` (colors, fonts, spacing, animations, responsive breakpoints) matches `references/templates/home-about/home.jsx` + `styles.css` on desktop and mobile viewport widths.
-- [ ] No console errors/warnings on `/` or `/juegos` during the flows above.
-- [ ] `npm run build` completes with no TypeScript or lint errors.
+- [x] `/` renders the new landing page: hero with floating silhouettes and CTAs, feature grid, games preview rail (first 6 `GAMES`, each linking to `/juegos/[id]`), stats band, activity/leaderboard section, pricing/FAQ section, and final CTA — matching `references/templates/home-about/home.jsx` visually and structurally.
+- [x] `/juegos` renders exactly what `/` used to render before this spec: hero header, search input, category chips, and game grid linking to `/juegos/[id]`.
+- [x] `/` no longer shows the library; `/juegos` is the only route showing it.
+- [x] Scroll-reveal: sections on the new home page fade/animate into view as they cross into the viewport (matching the template's `.reveal`/`.in` behavior), without console errors.
+- [x] On the new home page, "Explorar Juegos" and "Ver Todos los Juegos" and the final CTA all navigate to `/juegos`; "Crear Cuenta" and the pricing CTA navigate to `/iniciar-sesion`; "Ver Salón →" navigates to `/salon-de-la-fama`; each of the 6 preview game cards navigates to its `/juegos/[id]`.
+- [x] The Nav (desktop + mobile) shows "Inicio", "Biblioteca", a non-clickable "Acerca de" placeholder, and "Salón de la Fama"; "Inicio" highlights as active on `/`, "Biblioteca" highlights as active on `/juegos` and `/juegos/[id]*`.
+- [x] The Nav logo click and "Inicio" link both navigate to `/` (the new landing page).
+- [x] The back button on `/juegos/[id]`, the game-over screen's back-to-library button, and "Volver a Biblioteca" on `/salon-de-la-fama` all navigate to `/juegos` (not `/`).
+- [x] Signing in, signing up, or continuing as guest on `/iniciar-sesion` redirects to `/juegos` (not `/`).
+- [x] Visual output on `/` (colors, fonts, spacing, animations, responsive breakpoints) matches `references/templates/home-about/home.jsx` + `styles.css` on desktop and mobile viewport widths.
+- [x] No console errors/warnings on `/` or `/juegos` during the flows above.
+- [x] `npm run build` completes with no TypeScript or lint errors.
 
 ## Decisions Taken and Discarded
 
