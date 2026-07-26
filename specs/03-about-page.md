@@ -1,6 +1,6 @@
 # 03 - About Page & Contact Email
 
-- **Status:** Draft
+- **Status:** Approved
 - **Dependencies:** [02-home-landing-page.md](./02-home-landing-page.md)
 - **Date:** 2026-07-25
 - **Objective:** Port the `/acerca-de` page (mission statement + contact form) from `references/templates/home-about/about.jsx`, wiring the contact form to send an email via Resend.
