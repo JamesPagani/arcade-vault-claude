@@ -11,7 +11,8 @@ export function Nav() {
   const { user, signOut } = useAuth();
   const [open, setOpen] = useState(false);
 
-  const isBiblioteca = pathname === "/" || pathname.startsWith("/juegos");
+  const isInicio = pathname === "/";
+  const isBiblioteca = pathname.startsWith("/juegos");
   const isSalon = pathname === "/salon-de-la-fama";
   const isAuth = pathname === "/iniciar-sesion";
 
@@ -41,9 +42,15 @@ export function Nav() {
           </div>
         </Link>
         <div className="links">
-          <Link href="/" className={isBiblioteca ? "active" : ""} onClick={close}>
+          <Link href="/" className={isInicio ? "active" : ""} onClick={close}>
+            Inicio
+          </Link>
+          <Link href="/juegos" className={isBiblioteca ? "active" : ""} onClick={close}>
             Biblioteca
           </Link>
+          <span className="disabled" aria-disabled="true">
+            Acerca de
+          </span>
           <Link href="/salon-de-la-fama" className={isSalon ? "active" : ""} onClick={close}>
             Salón de la Fama
           </Link>
@@ -79,9 +86,15 @@ export function Nav() {
         <div className="pixel neon-cyan" style={{ fontSize: 11, marginBottom: 16 }}>
           MENÚ
         </div>
-        <Link href="/" className={isBiblioteca ? "active" : ""} onClick={close}>
+        <Link href="/" className={isInicio ? "active" : ""} onClick={close}>
+          Inicio
+        </Link>
+        <Link href="/juegos" className={isBiblioteca ? "active" : ""} onClick={close}>
           Biblioteca
         </Link>
+        <span className="disabled" aria-disabled="true">
+          Acerca de
+        </span>
         <Link href="/salon-de-la-fama" className={isSalon ? "active" : ""} onClick={close}>
           Salón de la Fama
         </Link>
