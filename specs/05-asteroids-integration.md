@@ -1,6 +1,6 @@
 # 05 - Asteroids: Real Game Integration
 
-- **Status:** Approved
+- **Status:** Implemented
 - **Dependencies:** 01-arcade-vault-mvp (catalog, GamePlayer shell, auth/score persistence)
 - **Date:** 2026-07-27
 - **Objective:** Port the standalone canvas prototype in `references/templates/started-games/02-asteroids/` into a real, playable Asteroids game inside `components/games/asteroids/`, adding it to the catalog as a new `asteroids` entry and wiring its live score/lives/level and game-over flow into the existing `GamePlayer` HUD and save-score modal.
@@ -111,17 +111,17 @@ export interface AsteroidsCanvasProps {
 
 - [x] `/` shows an "ASTEROIDS" card (SHOOTER category) linking to `/juegos/asteroids`.
 - [x] `/juegos/asteroids` renders the Game Detail page (cover, tags, description, leaderboard) with "Play Now" linking to `/juegos/asteroids/jugar`.
-- [ ] `/juegos/asteroids/jugar` renders the real, playable game: the ship rotates/thrusts with arrows, shoots with Space, wraps toroidally, asteroids split into smaller fragments when shot and award points per size, and the triple-shot power-up can be picked up and expires after its duration.
-- [ ] Keyboard input only affects the game when the canvas has focus, and doesn't scroll the page while playing.
-- [ ] The canvas's own HUD (SCORE/NIVEL/lives, GAME OVER overlay) still renders as in the original, alongside React's `player-hud`, which shows the same score/lives/level values in real time (not the fake incrementing simulation).
-- [ ] Clicking **PAUSA** freezes the game (ship/asteroids/bullets stop moving) and shows the existing "EN PAUSA" overlay; **REANUDAR** resumes exactly where it left off.
-- [ ] Clicking **FIN**, or losing all 3 lives in-game, opens the existing save-score modal pre-filled with the real final score reached in that run.
-- [ ] Saving the score from that modal writes to `localStorage` (`av_scores`) with the game id `asteroids`, and it appears correctly on `/salon-de-la-fama` under the Asteroids tab.
-- [ ] "JUGAR DE NUEVO" fully resets the engine (score 0, 3 lives, level 1, fresh asteroid field) and the game is immediately playable again.
-- [ ] On a narrow/mobile viewport, the canvas scales down visually (no horizontal overflow) while gameplay coordinates/logic remain unaffected.
-- [ ] All other catalog games' player screens are unchanged (still show the fake incrementing simulation).
-- [ ] No console errors/warnings during a full play-through (start → play → pause → die → save → restart → exit).
-- [ ] `npm run build` completes with no TypeScript or lint errors.
+- [x] `/juegos/asteroids/jugar` renders the real, playable game: the ship rotates/thrusts with arrows, shoots with Space, wraps toroidally, asteroids split into smaller fragments when shot and award points per size, and the triple-shot power-up can be picked up and expires after its duration.
+- [x] Keyboard input only affects the game when the canvas has focus, and doesn't scroll the page while playing.
+- [x] The canvas's own HUD (SCORE/NIVEL/lives, GAME OVER overlay) still renders as in the original, alongside React's `player-hud`, which shows the same score/lives/level values in real time (not the fake incrementing simulation).
+- [x] Clicking **PAUSA** freezes the game (ship/asteroids/bullets stop moving) and shows the existing "EN PAUSA" overlay; **REANUDAR** resumes exactly where it left off.
+- [x] Clicking **FIN**, or losing all 3 lives in-game, opens the existing save-score modal pre-filled with the real final score reached in that run.
+- [x] Saving the score from that modal writes to `localStorage` (`av_scores`) with the game id `asteroids`, and it appears correctly on `/salon-de-la-fama` under the Asteroids tab.
+- [x] "JUGAR DE NUEVO" fully resets the engine (score 0, 3 lives, level 1, fresh asteroid field) and the game is immediately playable again.
+- [x] On a narrow/mobile viewport, the canvas scales down visually (no horizontal overflow) while gameplay coordinates/logic remain unaffected.
+- [x] All other catalog games' player screens are unchanged (still show the fake incrementing simulation).
+- [x] No console errors/warnings during a full play-through (start → play → pause → die → save → restart → exit).
+- [x] `npm run build` completes with no TypeScript or lint errors.
 
 ## Decisions Taken and Discarded
 
