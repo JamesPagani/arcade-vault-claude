@@ -1,6 +1,6 @@
 # 06 - Games & Scores: Supabase-Backed Leaderboard
 
-- **Status:** Draft
+- **Status:** Approved
 - **Dependencies:** 04-supabase-installation (client SDKs, env vars), 05-asteroids-integration (only real game with live gameplay to award real scores)
 - **Date:** 2026-07-27
 - **Objective:** Create real Supabase `games` and `scores` tables seeded with only the `asteroids` row, replacing the static `GAMES` array and `seededScores`/`av_scores` mock wherever these tables are read, accepting that Library/Game Detail/Hall of Fame will show only 1 game until a future spec migrates the other 8.
