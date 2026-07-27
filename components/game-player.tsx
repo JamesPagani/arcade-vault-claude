@@ -1,42 +1,63 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/components/auth-provider";
 import type { Game } from "@/app/data/games";
+import { AsteroidsCanvas } from "@/components/games/asteroids/asteroids-canvas";
+import type { AsteroidsSnapshot } from "@/components/games/asteroids/engine";
 
 export function GamePlayer({ game }: { game: Game }) {
+  const isAsteroids = game.id === "asteroids";
   const { user, saveScore } = useAuth();
   const [score, setScore] = useState(0);
-  const [lives] = useState(3);
+  const [lives, setLives] = useState(3);
   const [level, setLevel] = useState(1);
   const [paused, setPaused] = useState(false);
   const [over, setOver] = useState(false);
   const [name, setName] = useState(user ? user.name : "INVITADO");
   const [saved, setSaved] = useState(false);
+  const [restartSignal, setRestartSignal] = useState(0);
 
   useEffect(() => {
-    if (over || paused) return;
-    const t = setInterval(() => setScore((s) => s + Math.floor(10 + Math.random() * 90)), 220);
+    if (isAsteroids || over || paused) return;
+    const t = setInterval(
+      () => setScore((s) => s + Math.floor(10 + Math.random() * 90)),
+      220,
+    );
     return () => clearInterval(t);
-  }, [over, paused]);
+  }, [isAsteroids, over, paused]);
 
   useEffect(() => {
     // Placeholder level-up tick matching the template's fake simulation, not a real
     // scoring engine — see spec decision to keep the player screen's mock as-is.
+    if (isAsteroids) return;
     if (score > 0 && score % 2500 < 100) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setLevel((l) => l + 1);
     }
-  }, [score]);
+  }, [isAsteroids, score]);
+
+  const handleSnapshot = useCallback((snapshot: AsteroidsSnapshot) => {
+    setScore(snapshot.score);
+    setLives(snapshot.lives);
+    setLevel(snapshot.level);
+  }, []);
+
+  const handleGameOver = useCallback((finalScore: number) => {
+    setScore(finalScore);
+    setOver(true);
+  }, []);
 
   const endGame = () => setOver(true);
   const restart = () => {
     setScore(0);
     setLevel(1);
+    setLives(3);
     setPaused(false);
     setOver(false);
     setSaved(false);
+    setRestartSignal((s) => s + 1);
   };
 
   return (
@@ -77,22 +98,39 @@ export function GamePlayer({ game }: { game: Game }) {
 
       <div className="crt">
         <div className="crt-screen">
-          <div className="game-arena">
-            <div className="grid-floor"></div>
-            <div className="enemy e1"></div>
-            <div className="enemy e2"></div>
-            <div className="enemy e3"></div>
-            <div className="player-ship"></div>
-          </div>
+          {isAsteroids ? (
+            <AsteroidsCanvas
+              paused={paused || over}
+              onSnapshot={handleSnapshot}
+              onGameOver={handleGameOver}
+              restartSignal={restartSignal}
+            />
+          ) : (
+            <div className="game-arena">
+              <div className="grid-floor"></div>
+              <div className="enemy e1"></div>
+              <div className="enemy e2"></div>
+              <div className="enemy e3"></div>
+              <div className="player-ship"></div>
+            </div>
+          )}
           {paused && (
-            <div className="crt-content" style={{ background: "rgba(0,0,0,0.6)", zIndex: 5 }}>
+            <div
+              className="crt-content"
+              style={{ background: "rgba(0,0,0,0.6)", zIndex: 5 }}
+            >
               <div>
                 <div className="pixel neon-yellow" style={{ fontSize: 22 }}>
                   EN PAUSA
                 </div>
                 <div
                   className="mono"
-                  style={{ fontSize: 11, color: "var(--ink-dim)", marginTop: 10, letterSpacing: "0.16em" }}
+                  style={{
+                    fontSize: 11,
+                    color: "var(--ink-dim)",
+                    marginTop: 10,
+                    letterSpacing: "0.16em",
+                  }}
                 >
                   PULSA REANUDAR PARA CONTINUAR
                 </div>
@@ -102,9 +140,7 @@ export function GamePlayer({ game }: { game: Game }) {
         </div>
         <div className="crt-bottom">
           <span className="led">SEÑAL OK</span>
-          <span>
-            {game.title} · CRT-83 · 60 HZ
-          </span>
+          <span>{game.title} · CRT-83 · 60 HZ</span>
           <span>CARGA · 1MB</span>
         </div>
       </div>
@@ -119,7 +155,9 @@ export function GamePlayer({ game }: { game: Game }) {
               <div className="input-row">
                 <input
                   value={name}
-                  onChange={(e) => setName(e.target.value.toUpperCase().slice(0, 10))}
+                  onChange={(e) =>
+                    setName(e.target.value.toUpperCase().slice(0, 10))
+                  }
                   placeholder="TUS INICIALES"
                 />
                 <button
