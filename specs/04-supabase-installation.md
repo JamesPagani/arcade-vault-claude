@@ -1,6 +1,6 @@
 # 04 - Supabase Installation & Configuration
 
-- **Status:** Approved
+- **Status:** Implemented
 - **Dependencies:** None (infrastructure spec, independent of specs 01-03)
 - **Date:** 2026-07-27
 - **Objective:** Install and configure the Supabase client SDKs (`@supabase/supabase-js`, `@supabase/ssr`) in the Next.js App Router project, with browser and server client utilities and environment variables, without implementing any real auth, database schema, or functional features.
@@ -42,15 +42,15 @@ No new data structures or tables are introduced — the Supabase database remain
 
 ## Acceptance Criteria
 
-- [ ] `@supabase/supabase-js` and `@supabase/ssr` appear in `package.json` dependencies and are installed in `node_modules`.
-- [ ] `.env.local` contains real `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` values; `.env.template` contains matching placeholder entries (no real secrets).
-- [ ] `lib/supabase/client.ts` exists and exports a working browser client factory using `createBrowserClient`.
-- [ ] `lib/supabase/server.ts` exists and exports a working server client factory using `createServerClient`, correctly wired to Next.js `cookies()`.
-- [ ] No `middleware.ts` is introduced by this spec.
-- [ ] The Supabase project has 0 tables in the `public` schema after this spec (verifiable via `list_tables`).
-- [ ] No existing functionality changes: `AuthProvider`'s `localStorage` auth (`av_user`) and score persistence (`av_scores`) behave exactly as before.
-- [ ] `npm run build` completes with no TypeScript or lint errors.
-- [ ] `npm run lint` reports no errors related to the new files (e.g. no unused exports/imports).
+- [x] `@supabase/supabase-js` and `@supabase/ssr` appear in `package.json` dependencies and are installed in `node_modules`.
+- [x] `.env.local` contains real `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` values; `.env.template` contains matching placeholder entries (no real secrets).
+- [x] `lib/supabase/client.ts` exists and exports a working browser client factory using `createBrowserClient`.
+- [x] `lib/supabase/server.ts` exists and exports a working server client factory using `createServerClient`, correctly wired to Next.js `cookies()`.
+- [x] No `middleware.ts` is introduced by this spec.
+- [x] The Supabase project has 0 tables in the `public` schema after this spec (verifiable via `list_tables`).
+- [x] No existing functionality changes: `AuthProvider`'s `localStorage` auth (`av_user`) and score persistence (`av_scores`) behave exactly as before.
+- [x] `npm run build` completes with no TypeScript or lint errors.
+- [x] `npm run lint` reports no errors related to the new files (e.g. no unused exports/imports).
 
 ## Decisions Taken and Discarded
 
