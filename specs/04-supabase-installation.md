@@ -1,6 +1,6 @@
 # 04 - Supabase Installation & Configuration
 
-- **Status:** Draft
+- **Status:** Approved
 - **Dependencies:** None (infrastructure spec, independent of specs 01-03)
 - **Date:** 2026-07-27
 - **Objective:** Install and configure the Supabase client SDKs (`@supabase/supabase-js`, `@supabase/ssr`) in the Next.js App Router project, with browser and server client utilities and environment variables, without implementing any real auth, database schema, or functional features.
