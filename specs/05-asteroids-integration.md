@@ -1,6 +1,6 @@
 # 05 - Asteroids: Real Game Integration
 
-- **Status:** Draft
+- **Status:** Approved
 - **Dependencies:** 01-arcade-vault-mvp (catalog, GamePlayer shell, auth/score persistence)
 - **Date:** 2026-07-27
 - **Objective:** Port the standalone canvas prototype in `references/templates/started-games/02-asteroids/` into a real, playable Asteroids game inside `components/games/asteroids/`, adding it to the catalog as a new `asteroids` entry and wiring its live score/lives/level and game-over flow into the existing `GamePlayer` HUD and save-score modal.
@@ -109,8 +109,8 @@ export interface AsteroidsCanvasProps {
 
 ## Acceptance Criteria
 
-- [ ] `/` shows an "ASTEROIDS" card (SHOOTER category) linking to `/juegos/asteroids`.
-- [ ] `/juegos/asteroids` renders the Game Detail page (cover, tags, description, leaderboard) with "Play Now" linking to `/juegos/asteroids/jugar`.
+- [x] `/` shows an "ASTEROIDS" card (SHOOTER category) linking to `/juegos/asteroids`.
+- [x] `/juegos/asteroids` renders the Game Detail page (cover, tags, description, leaderboard) with "Play Now" linking to `/juegos/asteroids/jugar`.
 - [ ] `/juegos/asteroids/jugar` renders the real, playable game: the ship rotates/thrusts with arrows, shoots with Space, wraps toroidally, asteroids split into smaller fragments when shot and award points per size, and the triple-shot power-up can be picked up and expires after its duration.
 - [ ] Keyboard input only affects the game when the canvas has focus, and doesn't scroll the page while playing.
 - [ ] The canvas's own HUD (SCORE/NIVEL/lives, GAME OVER overlay) still renders as in the original, alongside React's `player-hud`, which shows the same score/lives/level values in real time (not the fake incrementing simulation).

@@ -80,6 +80,17 @@ export const GAMES: Game[] = [
     plays: "15.6K",
   },
   {
+    id: "asteroids",
+    title: "ASTEROIDS",
+    short: "Sobrevive en un campo de rocas en gravedad cero.",
+    long: "Pilota una nave triangular en el vacío absoluto de un campo toroidal. Dispara y rota para partir las rocas grandes en fragmentos cada vez más pequeños, recoge el power-up de disparo triple y sobrevive oleada tras oleada.",
+    cat: "SHOOTER",
+    cover: "cover-asteroids",
+    color: "cyan",
+    best: 38700,
+    plays: "4.2K",
+  },
+  {
     id: "ranaria",
     title: "RANARIA",
     short: "Cruza la autopista de pixeles.",
