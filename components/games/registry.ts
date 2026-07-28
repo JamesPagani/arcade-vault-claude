@@ -1,5 +1,6 @@
 import type { ComponentType } from "react";
 import { AsteroidsCanvas } from "@/components/games/asteroids/asteroids-canvas";
+import { TetrisCanvas } from "@/components/games/tetris/tetris-canvas";
 
 export interface GameCanvasProps {
   paused: boolean;
@@ -14,4 +15,5 @@ export interface GameCanvasProps {
 
 export const GAME_ENGINES: Record<string, ComponentType<GameCanvasProps>> = {
   asteroids: AsteroidsCanvas,
+  tetris: TetrisCanvas,
 };

@@ -106,6 +106,7 @@ export function TetrisCanvas({
         display: "flex",
         gap: 16,
         justifyContent: "center",
+        alignItems: "flex-start",
         flexWrap: "wrap",
       }}
     >
