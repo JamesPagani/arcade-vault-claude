@@ -91,6 +91,17 @@ export const GAMES: Game[] = [
     plays: "4.2K",
   },
   {
+    id: "tetris",
+    title: "TETRIS",
+    short: "Encaja las piezas antes de que se acumulen.",
+    long: "Piezas geométricas caen desde el borde superior del tablero. Rótalas con wall kicks, usa la pieza fantasma para apuntar y limpia líneas completas para subir de nivel. La velocidad de caída aumenta cada 10 líneas.",
+    cat: "PUZZLE",
+    cover: "cover-tetris",
+    color: "yellow",
+    best: 210000,
+    plays: "1.0K",
+  },
+  {
     id: "ranaria",
     title: "RANARIA",
     short: "Cruza la autopista de pixeles.",
