@@ -1,6 +1,6 @@
 # 07 - Tetris: Real Game Integration
 
-- **Status:** Approved
+- **Status:** Implemented
 - **Dependencies:** 05-asteroids-integration (engine/canvas contract), 06-games-and-scores-supabase (games/scores schema)
 - **Date:** 2026-07-28
 - **Objective:** Port the standalone canvas prototype in `references/templates/started-games/03-tetris/` into a real, playable Tetris game inside `components/games/tetris/`, adding it to the catalog as a new `tetris` entry, introducing the `GAME_ENGINES` registry/dispatcher refactor as a no-regression prerequisite, and wiring its live score/lines/level and game-over flow into the existing `GamePlayer` HUD and save-score modal.
@@ -124,20 +124,20 @@ Same structural contract as `AsteroidsCanvasProps` (`reference.md` §2), plus in
 
 - [x] `tetris` card appears on `/juegos` with the correct PUZZLE category, yellow color, and `cover-tetris` art.
 - [x] `/juegos/tetris` (detail page) renders via `getGame("tetris")`, including its leaderboard section.
-- [ ] `/juegos/tetris/jugar` renders via `getGame("tetris")` (not `GAMES.find`), matching the detail route's data source.
-- [ ] Real gameplay matches the original mechanics: 8 piece types (including the undocumented "N/tuerca" piece) fall and lock, wall-kick rotation works at walls, ghost piece shows the landing position, soft drop (+1/row) and hard drop (+2/cell) both score correctly, line clears score `LINE_SCORES[n] × level`, level increases every 10 lines and drop speed increases accordingly.
-- [ ] Canvas-drawn HUD (SCORE/LINES/LEVEL) is visible on the main board canvas in addition to `GamePlayer`'s React HUD.
-- [ ] Next-piece preview canvas (120×120) renders the upcoming piece correctly, centered.
-- [ ] Keyboard (arrows, X, Space) only affects the game when the canvas is focused, and does not scroll the page.
-- [ ] PAUSA/REANUDAR freezes and resumes the drop loop without losing board state.
-- [ ] Both FIN and a real in-game game-over (blocked spawn) open the save-score modal pre-filled with the real final score.
-- [ ] Saving a score inserts a `scores` row for `tetris`, verifiable via `execute_sql`.
-- [ ] The new score ranks correctly on both `/juegos/tetris`'s leaderboard and `/salon-de-la-fama`.
-- [ ] "JUGAR DE NUEVO" fully resets the board, score, lines, level, drop speed, and next piece.
-- [ ] Canvas scales responsively on narrow viewports without horizontal overflow (both canvases).
-- [ ] Asteroids (and all other catalog games) are unregressed after the registry/dispatcher refactor and the `jugar/page.tsx` switch.
-- [ ] No console errors during a full play-through.
-- [ ] `npm run build` completes cleanly.
+- [x] `/juegos/tetris/jugar` renders via `getGame("tetris")` (not `GAMES.find`), matching the detail route's data source.
+- [x] Real gameplay matches the original mechanics: 8 piece types (including the undocumented "N/tuerca" piece) fall and lock, wall-kick rotation works at walls, ghost piece shows the landing position, soft drop (+1/row) and hard drop (+2/cell) both score correctly, line clears score `LINE_SCORES[n] × level`, level increases every 10 lines and drop speed increases accordingly.
+- [x] Canvas-drawn HUD (SCORE/LINES/LEVEL) is visible on the main board canvas in addition to `GamePlayer`'s React HUD.
+- [x] Next-piece preview canvas (120×120) renders the upcoming piece correctly, centered.
+- [x] Keyboard (arrows, X, Space) only affects the game when the canvas is focused, and does not scroll the page.
+- [x] PAUSA/REANUDAR freezes and resumes the drop loop without losing board state.
+- [x] Both FIN and a real in-game game-over (blocked spawn) open the save-score modal pre-filled with the real final score.
+- [x] Saving a score inserts a `scores` row for `tetris`, verifiable via `execute_sql`.
+- [x] The new score ranks correctly on both `/juegos/tetris`'s leaderboard and `/salon-de-la-fama`.
+- [x] "JUGAR DE NUEVO" fully resets the board, score, lines, level, drop speed, and next piece.
+- [x] Canvas scales responsively on narrow viewports without horizontal overflow (both canvases).
+- [x] Asteroids (and all other catalog games) are unregressed after the registry/dispatcher refactor and the `jugar/page.tsx` switch.
+- [x] No console errors during a full play-through.
+- [x] `npm run build` completes cleanly.
 
 ## Decisions Taken and Discarded
 
