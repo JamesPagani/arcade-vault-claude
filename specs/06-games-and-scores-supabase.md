@@ -1,6 +1,6 @@
 # 06 - Games & Scores: Supabase-Backed Leaderboard
 
-- **Status:** Approved
+- **Status:** Implemented
 - **Dependencies:** 04-supabase-installation (client SDKs, env vars), 05-asteroids-integration (only real game with live gameplay to award real scores)
 - **Date:** 2026-07-27
 - **Objective:** Create real Supabase `games` and `scores` tables seeded with only the `asteroids` row, replacing the static `GAMES` array and `seededScores`/`av_scores` mock wherever these tables are read, accepting that Library/Game Detail/Hall of Fame will show only 1 game until a future spec migrates the other 8.
@@ -154,19 +154,19 @@ export async function insertScore(
 
 ## Acceptance Criteria
 
-- [ ] Supabase project has a `games` table (RLS enabled, public `SELECT` policy) containing exactly 1 row (`asteroids`), verifiable via `list_tables`/`execute_sql`.
-- [ ] Supabase project has a `scores` table (RLS enabled, public `SELECT` and public `INSERT` policies, no `UPDATE`/`DELETE` policies), verifiable via `list_tables`.
-- [ ] `/` renders only the "ASTEROIDS" card (no other 8 games appear), sourced from `listGames()` — the static `GAMES` array is no longer imported by this page.
-- [ ] Search input and category chips on `/` still work over the (now single-item) list with no behavior change to the filtering logic itself.
-- [ ] `/juegos/asteroids` renders the Game Detail page sourced from `getGame("asteroids")`; any other id (e.g. `/juegos/rocas`) returns a 404.
-- [ ] `/juegos/asteroids`'s leaderboard section shows real rows from the `scores` table (empty state before any score is saved).
-- [ ] `/salon-de-la-fama` shows only an "asteroids" tab (sourced from `listGames()`), with podium/table built from real `scores` rows for `game_id = "asteroids"`.
-- [ ] Playing `/juegos/asteroids/jugar` to game-over and saving a score inserts a new row into the Supabase `scores` table (`game_id: "asteroids"`, correct `name`/`score`), verifiable via `execute_sql`.
-- [ ] A newly saved asteroids score appears immediately (on next navigation/reload) on both `/juegos/asteroids`'s leaderboard and `/salon-de-la-fama`'s asteroids tab, correctly ranked by score descending.
-- [ ] The "your score" highlighted row on `/salon-de-la-fama` still appears correctly when logged in via the existing fake `AuthProvider` session, matching on `name`.
-- [ ] The other 8 catalog games (`bloque-buster`, `caida`, `serpentina`, `gloton`, `invasores`, `rocas`, `ranaria`, `duelo-pixel`) no longer appear anywhere in the UI (confirmed intentional per Scope).
-- [ ] No console errors/warnings during the full flow (browse → detail → play → save score → hall of fame).
-- [ ] `npm run build` completes with no TypeScript or lint errors.
+- [x] Supabase project has a `games` table (RLS enabled, public `SELECT` policy) containing exactly 1 row (`asteroids`), verifiable via `list_tables`/`execute_sql`.
+- [x] Supabase project has a `scores` table (RLS enabled, public `SELECT` and public `INSERT` policies, no `UPDATE`/`DELETE` policies), verifiable via `list_tables`.
+- [x] `/` renders only the "ASTEROIDS" card (no other 8 games appear), sourced from `listGames()` — the static `GAMES` array is no longer imported by this page.
+- [x] Search input and category chips on `/` still work over the (now single-item) list with no behavior change to the filtering logic itself.
+- [x] `/juegos/asteroids` renders the Game Detail page sourced from `getGame("asteroids")`; any other id (e.g. `/juegos/rocas`) returns a 404.
+- [x] `/juegos/asteroids`'s leaderboard section shows real rows from the `scores` table (empty state before any score is saved).
+- [x] `/salon-de-la-fama` shows only an "asteroids" tab (sourced from `listGames()`), with podium/table built from real `scores` rows for `game_id = "asteroids"`.
+- [x] Playing `/juegos/asteroids/jugar` to game-over and saving a score inserts a new row into the Supabase `scores` table (`game_id: "asteroids"`, correct `name`/`score`), verifiable via `execute_sql`.
+- [x] A newly saved asteroids score appears immediately (on next navigation/reload) on both `/juegos/asteroids`'s leaderboard and `/salon-de-la-fama`'s asteroids tab, correctly ranked by score descending.
+- [x] The "your score" highlighted row on `/salon-de-la-fama` still appears correctly when logged in via the existing fake `AuthProvider` session, matching on `name`.
+- [x] The other 8 catalog games (`bloque-buster`, `caida`, `serpentina`, `gloton`, `invasores`, `rocas`, `ranaria`, `duelo-pixel`) no longer appear anywhere in the UI (confirmed intentional per Scope).
+- [x] No console errors/warnings during the full flow (browse → detail → play → save score → hall of fame).
+- [x] `npm run build` completes with no TypeScript or lint errors.
 
 ## Decisions Taken and Discarded
 
