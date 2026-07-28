@@ -4,12 +4,12 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/components/auth-provider";
 import type { Game } from "@/app/data/games";
-import { AsteroidsCanvas } from "@/components/games/asteroids/asteroids-canvas";
-import type { AsteroidsSnapshot } from "@/components/games/asteroids/engine";
+import { GAME_ENGINES } from "@/components/games/registry";
 import { insertScore } from "@/lib/scores-client";
 
 export function GamePlayer({ game }: { game: Game }) {
-  const isAsteroids = game.id === "asteroids";
+  const Canvas = GAME_ENGINES[game.id];
+  const isReal = Boolean(Canvas);
   const { user, saveScore } = useAuth();
   const [score, setScore] = useState(0);
   const [lives, setLives] = useState(3);
@@ -21,29 +21,32 @@ export function GamePlayer({ game }: { game: Game }) {
   const [restartSignal, setRestartSignal] = useState(0);
 
   useEffect(() => {
-    if (isAsteroids || over || paused) return;
+    if (isReal || over || paused) return;
     const t = setInterval(
       () => setScore((s) => s + Math.floor(10 + Math.random() * 90)),
       220,
     );
     return () => clearInterval(t);
-  }, [isAsteroids, over, paused]);
+  }, [isReal, over, paused]);
 
   useEffect(() => {
     // Placeholder level-up tick matching the template's fake simulation, not a real
     // scoring engine — see spec decision to keep the player screen's mock as-is.
-    if (isAsteroids) return;
+    if (isReal) return;
     if (score > 0 && score % 2500 < 100) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setLevel((l) => l + 1);
     }
-  }, [isAsteroids, score]);
+  }, [isReal, score]);
 
-  const handleSnapshot = useCallback((snapshot: AsteroidsSnapshot) => {
-    setScore(snapshot.score);
-    setLives(snapshot.lives);
-    setLevel(snapshot.level);
-  }, []);
+  const handleSnapshot = useCallback(
+    (snapshot: { score: number; lives: number; level: number }) => {
+      setScore(snapshot.score);
+      setLives(snapshot.lives);
+      setLevel(snapshot.level);
+    },
+    [],
+  );
 
   const handleGameOver = useCallback((finalScore: number) => {
     setScore(finalScore);
@@ -99,8 +102,8 @@ export function GamePlayer({ game }: { game: Game }) {
 
       <div className="crt">
         <div className="crt-screen">
-          {isAsteroids ? (
-            <AsteroidsCanvas
+          {isReal ? (
+            <Canvas
               paused={paused || over}
               onSnapshot={handleSnapshot}
               onGameOver={handleGameOver}
@@ -164,7 +167,7 @@ export function GamePlayer({ game }: { game: Game }) {
                 <button
                   className="btn yellow"
                   onClick={async () => {
-                    if (isAsteroids) {
+                    if (isReal) {
                       await insertScore(game.id, name, score);
                     } else {
                       saveScore({ game: game.id, score, name });
