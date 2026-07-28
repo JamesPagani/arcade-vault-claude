@@ -122,8 +122,8 @@ Same structural contract as `AsteroidsCanvasProps` (`reference.md` §2), plus in
 
 ## Acceptance Criteria
 
-- [ ] `tetris` card appears on `/juegos` with the correct PUZZLE category, yellow color, and `cover-tetris` art.
-- [ ] `/juegos/tetris` (detail page) renders via `getGame("tetris")`, including its leaderboard section.
+- [x] `tetris` card appears on `/juegos` with the correct PUZZLE category, yellow color, and `cover-tetris` art.
+- [x] `/juegos/tetris` (detail page) renders via `getGame("tetris")`, including its leaderboard section.
 - [ ] `/juegos/tetris/jugar` renders via `getGame("tetris")` (not `GAMES.find`), matching the detail route's data source.
 - [ ] Real gameplay matches the original mechanics: 8 piece types (including the undocumented "N/tuerca" piece) fall and lock, wall-kick rotation works at walls, ghost piece shows the landing position, soft drop (+1/row) and hard drop (+2/cell) both score correctly, line clears score `LINE_SCORES[n] × level`, level increases every 10 lines and drop speed increases accordingly.
 - [ ] Canvas-drawn HUD (SCORE/LINES/LEVEL) is visible on the main board canvas in addition to `GamePlayer`'s React HUD.
