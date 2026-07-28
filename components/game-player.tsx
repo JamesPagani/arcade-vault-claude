@@ -6,6 +6,7 @@ import { useAuth } from "@/components/auth-provider";
 import type { Game } from "@/app/data/games";
 import { AsteroidsCanvas } from "@/components/games/asteroids/asteroids-canvas";
 import type { AsteroidsSnapshot } from "@/components/games/asteroids/engine";
+import { insertScore } from "@/lib/scores-client";
 
 export function GamePlayer({ game }: { game: Game }) {
   const isAsteroids = game.id === "asteroids";
@@ -162,8 +163,12 @@ export function GamePlayer({ game }: { game: Game }) {
                 />
                 <button
                   className="btn yellow"
-                  onClick={() => {
-                    saveScore({ game: game.id, score, name });
+                  onClick={async () => {
+                    if (isAsteroids) {
+                      await insertScore(game.id, name, score);
+                    } else {
+                      saveScore({ game: game.id, score, name });
+                    }
                     setSaved(true);
                   }}
                 >

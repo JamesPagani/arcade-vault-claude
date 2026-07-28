@@ -1,5 +1,4 @@
-import { createClient as createServerClient } from "@/lib/supabase/server";
-import { createClient as createBrowserClient } from "@/lib/supabase/client";
+import { createClient } from "@/lib/supabase/server";
 
 export interface ScoreRow {
   id: string;
@@ -10,7 +9,7 @@ export interface ScoreRow {
 }
 
 export async function listScores(gameId: string): Promise<ScoreRow[]> {
-  const supabase = await createServerClient();
+  const supabase = await createClient();
   const { data, error } = await supabase
     .from("scores")
     .select("*")
@@ -20,17 +19,4 @@ export async function listScores(gameId: string): Promise<ScoreRow[]> {
   if (error) throw error;
 
   return data as ScoreRow[];
-}
-
-export async function insertScore(
-  gameId: string,
-  name: string,
-  score: number,
-): Promise<void> {
-  const supabase = createBrowserClient();
-  const { error } = await supabase
-    .from("scores")
-    .insert({ game_id: gameId, name, score });
-
-  if (error) throw error;
 }
