@@ -124,6 +124,17 @@ export const GAMES: Game[] = [
     plays: "1.0K",
   },
   {
+    id: "snake",
+    title: "SNAKE",
+    short: "Devora frutas y crece sin morder tu propia cola.",
+    long: "Una serpiente pixelada recorre una grilla neón devorando frutas reales del recreativo original — manzana, sandía, piña y más, elegidas al azar en cada aparición. Cada bocado la alarga y acelera su avance. Un giro en falso contra la pared o tu propia cola termina la partida.",
+    cat: "ARCADE",
+    cover: "cover-snake",
+    color: "green",
+    best: 0,
+    plays: "0",
+  },
+  {
     id: "duelo-pixel",
     title: "DUELO PIXEL",
     short: "Dos paletas. Una pelota. Reflejos máximos.",
