@@ -257,6 +257,13 @@ export class SnakeEngine {
     }
   }
 
+  private drawWalls() {
+    const ctx = this.ctx;
+    ctx.strokeStyle = "#4ade80";
+    ctx.lineWidth = 3;
+    ctx.strokeRect(1.5, 1.5, this.width - 3, this.height - 3);
+  }
+
   private drawHUD() {
     const ctx = this.ctx;
     ctx.fillStyle = "#fff";
@@ -284,6 +291,7 @@ export class SnakeEngine {
     ctx.fillRect(0, 0, this.width, this.height);
 
     this.drawGrid();
+    this.drawWalls();
     this.drawFood();
     this.drawSnake();
     this.drawHUD();

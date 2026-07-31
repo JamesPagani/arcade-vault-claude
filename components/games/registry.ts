@@ -1,6 +1,7 @@
 import type { ComponentType } from "react";
 import { ArkanoidCanvas } from "@/components/games/arkanoid/arkanoid-canvas";
 import { AsteroidsCanvas } from "@/components/games/asteroids/asteroids-canvas";
+import { SnakeCanvas } from "@/components/games/snake/snake-canvas";
 import { TetrisCanvas } from "@/components/games/tetris/tetris-canvas";
 
 export interface GameCanvasProps {
@@ -17,5 +18,6 @@ export interface GameCanvasProps {
 export const GAME_ENGINES: Record<string, ComponentType<GameCanvasProps>> = {
   arkanoid: ArkanoidCanvas,
   asteroids: AsteroidsCanvas,
+  snake: SnakeCanvas,
   tetris: TetrisCanvas,
 };
