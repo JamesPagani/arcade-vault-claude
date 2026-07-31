@@ -1,6 +1,6 @@
 # 09 - Snake Integration: original engine with random fruit sprites
 
-- **Status:** Approved
+- **Status:** Implemented
 - **Dependencies:** 05-asteroids-integration (engine/canvas contract), 06-games-and-scores-supabase (games/scores schema)
 - **Date:** 2026-07-31
 - **Objective:** Add a real, playable Snake game to Arcade Vault — an original grid-based engine (no template exists for it) that spawns a random fruit sprite from the provided atlas as the edible each time, wired into the catalog, Supabase, and the existing `GAME_ENGINES` registry.
@@ -106,22 +106,22 @@ Both one-time platform steps (registry/dispatcher, `jugar/page.tsx` data source)
 
 ## Acceptance Criteria
 
-- [ ] `SNAKE` card appears on `/juegos`, distinct from the existing `SERPENTINA` card (both visible, no collision).
-- [ ] `/juegos/snake` detail page renders via `getGame("snake")`, showing the real Supabase row (title, copy, cover art).
-- [ ] `/juegos/snake/jugar` resolves the same `snake` game via `getGame(id)` and renders `GamePlayer` with the real `SnakeCanvas`.
-- [ ] Real gameplay: snake moves on a fixed grid tick, grows by one segment per fruit eaten, a random fruit sprite (of the 21 in the atlas) renders at each new food position.
-- [ ] Colliding with the wall ends the game; colliding with the snake's own body ends the game; both produce the same `gameover` state.
-- [ ] Speed increases audibly/visibly every 5 fruit eaten (tick interval shortens), and `level` in the HUD reflects the current speed tier.
-- [ ] Keyboard (arrow keys and WASD) only affects the game when the canvas is focused, and never scrolls the page (no blanket `preventDefault`).
-- [ ] PAUSA freezes the tick loop; REANUDAR resumes from the exact same state (snake position, direction, food, score, tick interval).
-- [ ] Reaching `gameover` (wall/self collision) opens the save-score modal with the real final score.
-- [ ] Saving a score inserts a `scores` row for `game_id = "snake"`, verifiable via `execute_sql`.
-- [ ] The new score ranks correctly, sorted descending, on both `/juegos/snake`'s leaderboard and `/salon-de-la-fama`.
-- [ ] JUGAR DE NUEVO fully resets: snake back to initial position/length, score to 0, tick interval to base, level to 1, a freshly randomized fruit.
-- [ ] Canvas scales responsively on narrow viewports without horizontal overflow (`maxWidth: 800px`, `height: auto`).
-- [ ] Other games (Asteroids, Tetris, Arkanoid, and the fake `serpentina` entry) are unregressed — no shared state, no broken registry lookups.
-- [ ] No console errors during a full playthrough (movement, growth, death, restart, save).
-- [ ] `npm run build` completes clean.
+- [x] `SNAKE` card appears on `/juegos`, distinct from the existing `SERPENTINA` card (both visible, no collision).
+- [x] `/juegos/snake` detail page renders via `getGame("snake")`, showing the real Supabase row (title, copy, cover art).
+- [x] `/juegos/snake/jugar` resolves the same `snake` game via `getGame(id)` and renders `GamePlayer` with the real `SnakeCanvas`.
+- [x] Real gameplay: snake moves on a fixed grid tick, grows by one segment per fruit eaten, a random fruit sprite (of the 21 in the atlas) renders at each new food position.
+- [x] Colliding with the wall ends the game; colliding with the snake's own body ends the game; both produce the same `gameover` state.
+- [x] Speed increases audibly/visibly every 5 fruit eaten (tick interval shortens), and `level` in the HUD reflects the current speed tier.
+- [x] Keyboard (arrow keys and WASD) only affects the game when the canvas is focused, and never scrolls the page (no blanket `preventDefault`).
+- [x] PAUSA freezes the tick loop; REANUDAR resumes from the exact same state (snake position, direction, food, score, tick interval).
+- [x] Reaching `gameover` (wall/self collision) opens the save-score modal with the real final score.
+- [x] Saving a score inserts a `scores` row for `game_id = "snake"`, verifiable via `execute_sql`.
+- [x] The new score ranks correctly, sorted descending, on both `/juegos/snake`'s leaderboard and `/salon-de-la-fama`.
+- [x] JUGAR DE NUEVO fully resets: snake back to initial position/length, score to 0, tick interval to base, level to 1, a freshly randomized fruit.
+- [x] Canvas scales responsively on narrow viewports without horizontal overflow (`maxWidth: 800px`, `height: auto`).
+- [x] Other games (Asteroids, Tetris, Arkanoid, and the fake `serpentina` entry) are unregressed — no shared state, no broken registry lookups.
+- [x] No console errors during a full playthrough (movement, growth, death, restart, save).
+- [x] `npm run build` completes clean.
 
 ## Decisions Taken and Discarded
 
