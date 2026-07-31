@@ -1,6 +1,6 @@
 # 08 - Arkanoid: breakout port with sprites, levels, and explosions
 
-- **Status:** Approved
+- **Status:** Integrated
 - **Dependencies:** 05-asteroids-integration (engine/canvas contract), 06-games-and-scores-supabase (games/scores schema), 07-tetris-integration (registry already exists)
 - **Date:** 2026-07-28
 - **Objective:** Port the `04-arkanoid` template as a real playable game (`arkanoid`) with paddle+ball+3 block levels, sprites and sound, registered in Supabase and in `GAME_ENGINES`.
@@ -109,8 +109,8 @@ Same shape as the standard contract (`reference.md` §2) — no secondary canvas
 - [x] Paddle responds to ← → keys (keyboard-only — see "Not in scope" for why mouse control was dropped).
 - [x] Ball bounces correctly off walls, paddle, and blocks; blocks disappear with the 4-frame explosion animation and play the break sound.
 - [x] Losing a life (ball falls past the paddle) decrements lives and repositions the ball without ending the run, until lives reach 0.
-- [] Clearing all blocks in a level advances to the next level (2 and 3) with the correct block pattern.
-- [ ] Clearing level 3 (the template's last level) triggers the `win` state and behaves as a game over (score-save modal opens).
+- [x] Clearing all blocks in a level advances to the next level (2 and 3) with the correct block pattern.
+- [x] Clearing level 3 (the template's last level) triggers the `win` state and behaves as a game over (score-save modal opens).
 - [x] Losing all 3 lives triggers `gameover` and opens the same score-save modal.
 - [x] Keyboard input (← →) only affects the game when the canvas is focused and never scrolls the page.
 - [x] PAUSA/REANUDAR freezes and resumes the game (paddle, ball, blocks, explosions all stop and resume together).
