@@ -31,6 +31,12 @@ Skills that drive the workflow:
 - **`/add-game`** — project-local skill (`.claude/skills/add-game/`) that authors a game-integration spec. It never writes code, CSS, or SQL. Its `reference.md` is the **platform contract** for game integration (engine contract, canvas contract, registration rule, data layer, schema, cover-art pattern, per-template hazards) — read it before touching anything under `components/games/`.
 - **`/frontend-design`** — always use this when designing or reshaping UI.
 
+### Agents
+
+- **`game-planner`** (`.claude/agents/game-planner.md`) — decides _which_ game the platform builds next. It scores candidates against the platform contract (portability, leaderboard fit, catalog balance, CSS-only cover art, asset burden, effort), maintains the Spanish to-do list at `references/game-suggestions-todo.md`, and keeps its own memory in `.claude/game-planner/` (`decisions.md` append-only log, `rejected.md` ledger, `README.md` protocol). It writes nowhere else and never produces specs or code.
+
+The hand-off chain is **`game-planner` → `/add-game <slug>` → `/spec-impl`**: pick the game, author the spec, implement it.
+
 ## Architecture
 
 ### Routing (App Router only, no `pages/`)
@@ -83,7 +89,9 @@ Tailwind CSS v4 via `@tailwindcss/postcss` — configured through CSS, there is 
 ### `references/` (not shipped, Prettier-ignored)
 
 - `references/templates/*.jsx` + `styles.css` — the original static design mockups the pages were ported from.
-- `references/templates/started-games/NN-<game>/` — vanilla HTML/JS source games used as porting input. **Their READMEs are known to contradict their own code** — trust the code, and check `reference.md` §9 for documented per-template hazards.
+- `references/templates/started-games/NN-<game>/` — vanilla HTML/JS source games used as porting input. **Their READMEs are known to contradict their own code** — trust the code, and check `reference.md` §9 for documented per-template hazards. All three (asteroids, tetris, arkanoid) are already ported; future games have no template.
+- `references/implemented-games.md` — the shipped catalog, in Spanish. Source of truth for what exists.
+- `references/game-suggestions-todo.md` — the ranked backlog of proposed games, owned by the `game-planner` agent. Prettier does not touch this directory, so keep it tidy by hand.
 
 ## Next.js 16
 
