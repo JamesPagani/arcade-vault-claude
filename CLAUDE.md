@@ -34,8 +34,9 @@ Skills that drive the workflow:
 ### Agents
 
 - **`game-planner`** (`.claude/agents/game-planner.md`) — decides _which_ game the platform builds next. It scores candidates against the platform contract (portability, leaderboard fit, catalog balance, CSS-only cover art, asset burden, effort), maintains the Spanish to-do list at `references/game-suggestions-todo.md`, and keeps its own memory in `.claude/game-planner/` (`decisions.md` append-only log, `rejected.md` ledger, `README.md` protocol). It writes nowhere else and never produces specs or code.
+- **`game-jam`** (`.claude/agents/game-jam.md`) — given a loose topic (e.g. "a game about coffee"), invents an original game from scratch and authors at least two full, independently implementable specs for it under `specs/game-jam/<game-id>/` (a core integration spec plus follow-ups), reusing the same platform contract. Runs autonomously, no interview. Writes only under `specs/game-jam/`; never code, CSS, SQL, or migrations.
 
-The hand-off chain is **`game-planner` → `/add-game <slug>` → `/spec-impl`**: pick the game, author the spec, implement it.
+Two hand-off chains: **`game-planner` → `/add-game <slug>` → `/spec-impl`** for picking a known game from the backlog, and **`game-jam <topic>` → `/spec-impl specs/game-jam/<slug>/01-...`** for inventing an original one from a theme.
 
 ## Architecture
 
