@@ -5,6 +5,13 @@ import Link from "next/link";
 import { useAuth } from "@/components/auth-provider";
 import type { Game } from "@/app/data/games";
 import { GAME_ENGINES } from "@/components/games/registry";
+import {
+  DEFAULT_SKIN,
+  isSkinId,
+  SKIN_IDS,
+  SKINS,
+  type SkinId,
+} from "@/components/games/skins";
 import { insertScore } from "@/lib/scores-client";
 
 export function GamePlayer({ game }: { game: Game }) {
@@ -19,6 +26,24 @@ export function GamePlayer({ game }: { game: Game }) {
   const [name, setName] = useState(user ? user.name : "INVITADO");
   const [saved, setSaved] = useState(false);
   const [restartSignal, setRestartSignal] = useState(0);
+  const [skin, setSkin] = useState<SkinId>(DEFAULT_SKIN);
+
+  useEffect(() => {
+    // Reads localStorage (unavailable during server render) after mount to avoid a
+    // hydration mismatch, same as AuthProvider; the default skin is always what the
+    // first paint shows by design.
+    const stored = localStorage.getItem("av_skin");
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (isSkinId(stored)) setSkin(stored);
+  }, []);
+
+  const cycleSkin = () => {
+    setSkin((current) => {
+      const next = SKIN_IDS[(SKIN_IDS.indexOf(current) + 1) % SKIN_IDS.length];
+      localStorage.setItem("av_skin", next);
+      return next;
+    });
+  };
 
   useEffect(() => {
     if (isReal || over || paused) return;
@@ -90,6 +115,11 @@ export function GamePlayer({ game }: { game: Game }) {
           </div>
         </div>
         <div className="hud-actions">
+          {isReal && (
+            <button className="btn" onClick={cycleSkin} title="Cambiar aspecto">
+              {SKINS[skin].label}
+            </button>
+          )}
           <button className="btn yellow" onClick={() => setPaused((p) => !p)}>
             {paused ? "REANUDAR" : "PAUSA"}
           </button>
@@ -110,6 +140,7 @@ export function GamePlayer({ game }: { game: Game }) {
               onSnapshot={handleSnapshot}
               onGameOver={handleGameOver}
               restartSignal={restartSignal}
+              skin={skin}
             />
           ) : (
             <div className="game-arena">
