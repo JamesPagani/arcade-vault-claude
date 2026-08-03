@@ -730,6 +730,102 @@ a { color: inherit; text-decoration: none; }
   background: var(--green); box-shadow: 0 0 6px var(--green);
 }
 
+.touch-controls {
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin-top: 14px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  background: var(--bg-2);
+}
+@media (pointer: coarse) {
+  .touch-controls { display: flex; }
+}
+.touch-controls button {
+  appearance: none;
+  -webkit-appearance: none;
+  margin: 0;
+  padding: 0;
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: none;
+}
+
+.dpad {
+  position: relative;
+  width: 132px;
+  height: 132px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  gap: 4px;
+  flex-shrink: 0;
+}
+.dpad-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--pixel);
+  font-size: 14px;
+  color: var(--cyan);
+  background: var(--bg-3);
+  border: 1px solid var(--line);
+  transition: box-shadow 80ms ease, color 80ms ease, background 80ms ease;
+}
+.dpad-up { grid-column: 2; grid-row: 1; }
+.dpad-left { grid-column: 1; grid-row: 2; }
+.dpad-right { grid-column: 3; grid-row: 2; }
+.dpad-down { grid-column: 2; grid-row: 3; }
+.dpad-btn:active:not(:disabled) {
+  color: var(--bg);
+  background: var(--cyan);
+  box-shadow: 0 0 16px rgba(0, 245, 255, 0.6);
+}
+.dpad-btn:disabled {
+  opacity: 0.3;
+  color: var(--ink-faint);
+  border-color: var(--line-2);
+}
+
+.action-buttons {
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 14px;
+  flex-shrink: 0;
+}
+.action-btn {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--pixel);
+  font-size: 13px;
+  border: 1px solid var(--magenta);
+  color: var(--magenta);
+  background: var(--bg-3);
+  transition: box-shadow 80ms ease, background 80ms ease;
+}
+.action-a { align-self: flex-end; }
+.action-b {
+  align-self: flex-start;
+  border-color: var(--cyan);
+  color: var(--cyan);
+}
+.action-btn:active:not(:disabled) {
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 0 16px currentColor;
+}
+.action-btn:disabled {
+  opacity: 0.3;
+  border-color: var(--line-2);
+  color: var(--ink-faint);
+}
+
 /* fake in-screen game */
 .game-arena {
   position: absolute; inset: 0;
