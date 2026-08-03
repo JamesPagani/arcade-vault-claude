@@ -1,6 +1,6 @@
 # 10 - Mobile Touch Controls: D-pad and A/B buttons for all playable games
 
-- **Status:** Draft
+- **Status:** Approved
 - **Dependencies:** 05-asteroids-integration (canvas/engine contract), 07-tetris-integration, 08-arkanoid-integration, 09-snake-integration (canvas/engine contract of the 4 existing games)
 - **Date:** 2026-08-03
 - **Objective:** Add touch controls (directional D-pad + A/B action buttons) to the four playable games, shown automatically on touch-pointer devices and coexisting with keyboard input, via a centralized per-game declarative mapping.
