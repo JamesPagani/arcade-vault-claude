@@ -6,6 +6,14 @@
 // ported literally rather than invented to match spec prose that described a 5-level, mouse+keyboard
 // game. `reset()` is designed from scratch since the template has no restart mechanism.
 
+import type { SkinId } from "@/components/games/skins";
+import { ARKANOID_PALETTES, type ArkanoidPalette } from "@/components/games/arkanoid/skins";
+
+const glow = (ctx: CanvasRenderingContext2D, color: string, palette: ArkanoidPalette) => {
+  ctx.shadowColor = color;
+  ctx.shadowBlur = palette.glowBlur;
+};
+
 export type ArkanoidState = "playing" | "gameover" | "win";
 
 export interface ArkanoidSnapshot {
@@ -157,18 +165,25 @@ export class ArkanoidEngine {
   private bounceSound: HTMLAudioElement;
   private breakSound: HTMLAudioElement;
 
-  constructor(ctx: CanvasRenderingContext2D, width: number, height: number) {
+  private palette: ArkanoidPalette;
+
+  constructor(ctx: CanvasRenderingContext2D, width: number, height: number, skin: SkinId = "classic") {
     this.ctx = ctx;
     this.width = width;
     this.height = height;
     this.brickOffsetLeft = (width - (BRICK_COLS * BRICK_WIDTH + (BRICK_COLS - 1) * BRICK_GAP)) / 2;
     this.paddleY = height - 40;
+    this.palette = ARKANOID_PALETTES[skin];
 
     this.bounceSound = new Audio("/games/arkanoid/sounds/ball-bounce.mp3");
     this.breakSound = new Audio("/games/arkanoid/sounds/break-sound.mp3");
 
     this.loadSpritesheet();
     this.reset();
+  }
+
+  setSkin(id: SkinId) {
+    this.palette = ARKANOID_PALETTES[id];
   }
 
   private loadSpritesheet() {
@@ -396,25 +411,46 @@ export class ArkanoidEngine {
   }
 
   private drawBricks() {
+    const ctx = this.ctx;
     for (const brick of this.blocks) {
       if (!brick.alive) continue;
-      this.drawSprite(`block_${brick.color}`, brick.x, brick.y, brick.width, brick.height);
+      if (this.palette.useSprites) {
+        this.drawSprite(`block_${brick.color}`, brick.x, brick.y, brick.width, brick.height);
+        continue;
+      }
+      const color = this.palette.brickColors[brick.color];
+      glow(ctx, color, this.palette);
+      ctx.fillStyle = color;
+      ctx.fillRect(brick.x, brick.y, brick.width, brick.height);
     }
   }
 
+  // Neon/retro have no spritesheet frames to fall back on, so a broken brick flashes a plain
+  // fading rect in palette.explosionFlash instead of playing the sprite explosion animation.
   private drawExplosions() {
+    const ctx = this.ctx;
     const frameDuration = EXPLOSION_DURATION / 4;
     const now = performance.now();
     for (const explosion of this.explosions) {
       const elapsed = now - explosion.startTime;
-      const frameIndex = Math.min(3, Math.floor(elapsed / frameDuration));
-      this.drawFrame(EXPLOSION_FRAMES[explosion.color][frameIndex], explosion.x, explosion.y, explosion.width, explosion.height);
+      if (this.palette.useSprites) {
+        const frameIndex = Math.min(3, Math.floor(elapsed / frameDuration));
+        this.drawFrame(EXPLOSION_FRAMES[explosion.color][frameIndex], explosion.x, explosion.y, explosion.width, explosion.height);
+        continue;
+      }
+      const alpha = Math.max(0, 1 - elapsed / EXPLOSION_DURATION);
+      glow(ctx, this.palette.explosionFlash, this.palette);
+      ctx.globalAlpha = alpha;
+      ctx.fillStyle = this.palette.explosionFlash;
+      ctx.fillRect(explosion.x, explosion.y, explosion.width, explosion.height);
+      ctx.globalAlpha = 1;
     }
   }
 
   private drawHud() {
     const ctx = this.ctx;
-    ctx.fillStyle = "#fff";
+    ctx.fillStyle = this.palette.hudText;
+    glow(ctx, this.palette.hudText, this.palette);
     ctx.font = "bold 20px sans-serif";
     ctx.textBaseline = "top";
 
@@ -432,15 +468,19 @@ export class ArkanoidEngine {
     const ctx = this.ctx;
     const title = this.state === "win" ? "¡Completaste el juego!" : "GAME OVER";
 
-    ctx.fillStyle = "rgba(0, 0, 0, 0.7)";
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = this.palette.overlayScrim;
     ctx.fillRect(0, 0, this.width, this.height);
 
-    ctx.fillStyle = "#fff";
+    ctx.fillStyle = this.palette.overlayTitle;
+    glow(ctx, this.palette.overlayTitle, this.palette);
     ctx.textAlign = "center";
 
     ctx.font = "bold 40px sans-serif";
     ctx.fillText(title, this.width / 2, this.height / 2 - 20);
 
+    ctx.fillStyle = this.palette.overlaySubtitle;
+    glow(ctx, this.palette.overlaySubtitle, this.palette);
     ctx.font = "24px sans-serif";
     ctx.fillText(`Puntaje final: ${this.score}`, this.width / 2, this.height / 2 + 30);
   }
@@ -448,13 +488,27 @@ export class ArkanoidEngine {
   draw() {
     const ctx = this.ctx;
     ctx.clearRect(0, 0, this.width, this.height);
-    ctx.fillStyle = "#000";
+    // The background never glows; blur is reset here so no shadow leaks across frames.
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = this.palette.background;
     ctx.fillRect(0, 0, this.width, this.height);
 
     this.drawBricks();
     this.drawExplosions();
-    this.drawSprite("paddle", this.paddle.x, this.paddle.y, this.paddle.width, this.paddle.height);
-    this.drawSprite("ball", this.ball.x - this.ball.radius, this.ball.y - this.ball.radius, this.ball.radius * 2, this.ball.radius * 2);
+    if (this.palette.useSprites) {
+      this.drawSprite("paddle", this.paddle.x, this.paddle.y, this.paddle.width, this.paddle.height);
+      this.drawSprite("ball", this.ball.x - this.ball.radius, this.ball.y - this.ball.radius, this.ball.radius * 2, this.ball.radius * 2);
+    } else {
+      glow(ctx, this.palette.paddle, this.palette);
+      ctx.fillStyle = this.palette.paddle;
+      ctx.fillRect(this.paddle.x, this.paddle.y, this.paddle.width, this.paddle.height);
+
+      glow(ctx, this.palette.ball, this.palette);
+      ctx.fillStyle = this.palette.ball;
+      ctx.beginPath();
+      ctx.arc(this.ball.x, this.ball.y, this.ball.radius, 0, Math.PI * 2);
+      ctx.fill();
+    }
     this.drawHud();
 
     if (this.state === "gameover" || this.state === "win") this.drawEndScreen();

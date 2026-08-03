@@ -5,6 +5,7 @@ import {
   SnakeEngine,
   type SnakeSnapshot,
 } from "@/components/games/snake/engine";
+import { DEFAULT_SKIN, type SkinId } from "@/components/games/skins";
 
 const WIDTH = 800;
 const HEIGHT = 600;
@@ -24,6 +25,7 @@ export interface SnakeCanvasProps {
   onSnapshot: (snapshot: SnakeSnapshot) => void;
   onGameOver: (finalScore: number) => void;
   restartSignal: number;
+  skin?: SkinId;
 }
 
 export function SnakeCanvas({
@@ -31,6 +33,7 @@ export function SnakeCanvas({
   onSnapshot,
   onGameOver,
   restartSignal,
+  skin = DEFAULT_SKIN,
 }: SnakeCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const engineRef = useRef<SnakeEngine | null>(null);
@@ -38,6 +41,9 @@ export function SnakeCanvas({
   const onSnapshotRef = useRef(onSnapshot);
   const onGameOverRef = useRef(onGameOver);
   const wasGameOverRef = useRef(false);
+  // Read through a ref so the mount-only rAF effect keeps its empty dependency array;
+  // later changes arrive through the imperative setSkin effect below.
+  const initialSkinRef = useRef(skin);
 
   useEffect(() => {
     pausedRef.current = paused;
@@ -50,7 +56,7 @@ export function SnakeCanvas({
     const ctx = canvas?.getContext("2d");
     if (!canvas || !ctx) return;
 
-    const engine = new SnakeEngine(ctx, WIDTH, HEIGHT);
+    const engine = new SnakeEngine(ctx, WIDTH, HEIGHT, initialSkinRef.current);
     engineRef.current = engine;
     wasGameOverRef.current = false;
 
@@ -87,6 +93,12 @@ export function SnakeCanvas({
     wasGameOverRef.current = false;
     engineRef.current?.reset();
   }, [restartSignal]);
+
+  // Imperative, never a remount: the engine survives prop changes, so switching skins
+  // mid-run must not reset the game. Same shape as the restartSignal effect above.
+  useEffect(() => {
+    engineRef.current?.setSkin(skin);
+  }, [skin]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLCanvasElement>) => {
     if (GAME_KEYS.has(e.code)) e.preventDefault();
