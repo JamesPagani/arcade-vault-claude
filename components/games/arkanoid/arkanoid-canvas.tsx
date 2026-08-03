@@ -5,6 +5,7 @@ import {
   ArkanoidEngine,
   type ArkanoidSnapshot,
 } from "@/components/games/arkanoid/engine";
+import { DEFAULT_SKIN, type SkinId } from "@/components/games/skins";
 
 const WIDTH = 800;
 const HEIGHT = 600;
@@ -15,6 +16,7 @@ export interface ArkanoidCanvasProps {
   onSnapshot: (snapshot: ArkanoidSnapshot) => void;
   onGameOver: (finalScore: number) => void;
   restartSignal: number;
+  skin?: SkinId;
 }
 
 export function ArkanoidCanvas({
@@ -22,6 +24,7 @@ export function ArkanoidCanvas({
   onSnapshot,
   onGameOver,
   restartSignal,
+  skin = DEFAULT_SKIN,
 }: ArkanoidCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const engineRef = useRef<ArkanoidEngine | null>(null);
@@ -29,6 +32,9 @@ export function ArkanoidCanvas({
   const onSnapshotRef = useRef(onSnapshot);
   const onGameOverRef = useRef(onGameOver);
   const wasOverRef = useRef(false);
+  // Read through a ref so the mount-only rAF effect keeps its empty dependency array;
+  // later changes arrive through the imperative setSkin effect below.
+  const initialSkinRef = useRef(skin);
 
   useEffect(() => {
     pausedRef.current = paused;
@@ -41,7 +47,12 @@ export function ArkanoidCanvas({
     const ctx = canvas?.getContext("2d");
     if (!canvas || !ctx) return;
 
-    const engine = new ArkanoidEngine(ctx, WIDTH, HEIGHT);
+    const engine = new ArkanoidEngine(
+      ctx,
+      WIDTH,
+      HEIGHT,
+      initialSkinRef.current,
+    );
     engineRef.current = engine;
     wasOverRef.current = false;
 
@@ -80,6 +91,12 @@ export function ArkanoidCanvas({
     wasOverRef.current = false;
     engineRef.current?.reset();
   }, [restartSignal]);
+
+  // Imperative, never a remount: the engine survives prop changes, so switching skins
+  // mid-run must not reset the game. Same shape as the restartSignal effect above.
+  useEffect(() => {
+    engineRef.current?.setSkin(skin);
+  }, [skin]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLCanvasElement>) => {
     if (GAME_KEYS.has(e.code)) e.preventDefault();

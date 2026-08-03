@@ -5,6 +5,7 @@ import {
   AsteroidsEngine,
   type AsteroidsSnapshot,
 } from "@/components/games/asteroids/engine";
+import { DEFAULT_SKIN, type SkinId } from "@/components/games/skins";
 
 const WIDTH = 800;
 const HEIGHT = 600;
@@ -15,6 +16,7 @@ export interface AsteroidsCanvasProps {
   onSnapshot: (snapshot: AsteroidsSnapshot) => void;
   onGameOver: (finalScore: number) => void;
   restartSignal: number;
+  skin?: SkinId;
 }
 
 export function AsteroidsCanvas({
@@ -22,6 +24,7 @@ export function AsteroidsCanvas({
   onSnapshot,
   onGameOver,
   restartSignal,
+  skin = DEFAULT_SKIN,
 }: AsteroidsCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const engineRef = useRef<AsteroidsEngine | null>(null);
@@ -29,6 +32,9 @@ export function AsteroidsCanvas({
   const onSnapshotRef = useRef(onSnapshot);
   const onGameOverRef = useRef(onGameOver);
   const wasGameOverRef = useRef(false);
+  // Read through a ref so the mount-only rAF effect keeps its empty dependency array;
+  // later changes arrive through the imperative setSkin effect below.
+  const initialSkinRef = useRef(skin);
 
   useEffect(() => {
     pausedRef.current = paused;
@@ -41,7 +47,12 @@ export function AsteroidsCanvas({
     const ctx = canvas?.getContext("2d");
     if (!canvas || !ctx) return;
 
-    const engine = new AsteroidsEngine(ctx, WIDTH, HEIGHT);
+    const engine = new AsteroidsEngine(
+      ctx,
+      WIDTH,
+      HEIGHT,
+      initialSkinRef.current,
+    );
     engineRef.current = engine;
     wasGameOverRef.current = false;
 
@@ -78,6 +89,12 @@ export function AsteroidsCanvas({
     wasGameOverRef.current = false;
     engineRef.current?.reset();
   }, [restartSignal]);
+
+  // Imperative, never a remount: the engine survives prop changes, so switching skins
+  // mid-run must not reset the game. Same shape as the restartSignal effect above.
+  useEffect(() => {
+    engineRef.current?.setSkin(skin);
+  }, [skin]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLCanvasElement>) => {
     if (GAME_KEYS.has(e.code)) e.preventDefault();

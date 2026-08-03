@@ -2,6 +2,9 @@
 // Fruit crops ported from references/templates/source-assets/snake-assets/sprites.js
 // (window.SPRITE_ATLAS.fruits) into the FRUIT_ATLAS constant below.
 
+import { DEFAULT_SKIN, type SkinId } from "@/components/games/skins";
+import { SNAKE_PALETTES, type SnakePalette } from "@/components/games/snake/skins";
+
 export type SnakeState = "playing" | "dead" | "gameover";
 
 export interface SnakeSnapshot {
@@ -106,13 +109,20 @@ export class SnakeEngine {
 
   private fruitImage: HTMLImageElement;
   private imageLoaded = false;
+  private palette: SnakePalette;
 
-  constructor(ctx: CanvasRenderingContext2D, width: number, height: number) {
+  constructor(
+    ctx: CanvasRenderingContext2D,
+    width: number,
+    height: number,
+    skin: SkinId = DEFAULT_SKIN,
+  ) {
     this.ctx = ctx;
     this.width = width;
     this.height = height;
     this.cols = Math.floor(width / CELL);
     this.rows = Math.floor(height / CELL);
+    this.palette = SNAKE_PALETTES[skin];
 
     this.fruitImage = new Image();
     this.fruitImage.onload = () => {
@@ -144,6 +154,10 @@ export class SnakeEngine {
 
   getSnapshot(): SnakeSnapshot {
     return { score: this.score, lives: 1, level: this.level, state: this.state };
+  }
+
+  setSkin(id: SkinId) {
+    this.palette = SNAKE_PALETTES[id];
   }
 
   private spawnFood() {
@@ -231,17 +245,22 @@ export class SnakeEngine {
 
   private drawSnake() {
     const ctx = this.ctx;
+    const palette = this.palette;
+    ctx.shadowBlur = palette.glowBlur;
     for (let i = 0; i < this.snake.length; i++) {
       const seg = this.snake[i];
       const isHead = i === this.snake.length - 1;
-      ctx.fillStyle = isHead ? "#4ade80" : "#16a34a";
+      const color = isHead ? palette.head : palette.body;
+      ctx.fillStyle = color;
+      ctx.shadowColor = color;
       ctx.fillRect(seg.x * CELL + 1, seg.y * CELL + 1, CELL - 2, CELL - 2);
     }
+    ctx.shadowBlur = 0;
   }
 
   private drawGrid() {
     const ctx = this.ctx;
-    ctx.strokeStyle = "rgba(255,255,255,0.05)";
+    ctx.strokeStyle = this.palette.gridLine;
     ctx.lineWidth = 1;
     for (let x = 0; x <= this.cols; x++) {
       ctx.beginPath();
@@ -259,35 +278,45 @@ export class SnakeEngine {
 
   private drawWalls() {
     const ctx = this.ctx;
-    ctx.strokeStyle = "#4ade80";
+    ctx.strokeStyle = this.palette.wall;
+    ctx.shadowColor = this.palette.wall;
+    ctx.shadowBlur = this.palette.glowBlur;
     ctx.lineWidth = 3;
     ctx.strokeRect(1.5, 1.5, this.width - 3, this.height - 3);
+    ctx.shadowBlur = 0;
   }
 
   private drawHUD() {
     const ctx = this.ctx;
-    ctx.fillStyle = "#fff";
+    ctx.fillStyle = this.palette.hudText;
+    ctx.shadowColor = this.palette.hudText;
+    ctx.shadowBlur = this.palette.glowBlur;
     ctx.font = "15px monospace";
     ctx.textAlign = "left";
     ctx.fillText(`SCORE  ${this.score}`, 14, 26);
     ctx.textAlign = "center";
     ctx.fillText(`NIVEL ${this.level}`, this.width / 2, 26);
+    ctx.shadowBlur = 0;
   }
 
   private drawOverlay(title: string, sub: string) {
     const ctx = this.ctx;
     ctx.textAlign = "center";
-    ctx.fillStyle = "#fff";
+    ctx.fillStyle = this.palette.overlayTitle;
+    ctx.shadowColor = this.palette.overlayTitle;
+    ctx.shadowBlur = this.palette.glowBlur;
     ctx.font = "bold 46px monospace";
     ctx.fillText(title, this.width / 2, this.height / 2 - 18);
     ctx.font = "18px monospace";
-    ctx.fillStyle = "rgba(255,255,255,0.65)";
+    ctx.fillStyle = this.palette.overlaySub;
     ctx.fillText(sub, this.width / 2, this.height / 2 + 22);
+    ctx.shadowBlur = 0;
   }
 
   draw() {
     const ctx = this.ctx;
-    ctx.fillStyle = "#000";
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = this.palette.background;
     ctx.fillRect(0, 0, this.width, this.height);
 
     this.drawGrid();
