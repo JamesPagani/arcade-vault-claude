@@ -207,17 +207,66 @@ export class FroggerEngine {
     const dir = KEY_TO_DIRECTION[code];
     if (!dir) return;
     if (this.state !== "playing") return;
-    this.pendingDirection = dir;
+    if (this.frog.hopFrom === null) {
+      this.startHop(dir);
+    } else {
+      // Mid-hop: buffer at most one pending direction, overwriting any earlier one.
+      this.pendingDirection = dir;
+    }
   }
 
   handleKeyUp(_code: string) {
     // Frogger has no press-and-hold behavior — one hop per press.
   }
 
+  // Bounds: columns 0..COLS-1, rows 1..ROW_START (row 0 and ROW_BOTTOM_BAR are
+  // canvas-only HUD strips, never playable cells).
+  private startHop(dir: Direction) {
+    let dc = 0;
+    let dr = 0;
+    if (dir === "up") dr = -1;
+    else if (dir === "down") dr = 1;
+    else if (dir === "left") dc = -1;
+    else dc = 1;
+
+    const targetCol = Math.round(this.frog.col) + dc;
+    const targetRow = this.frog.row + dr;
+    if (targetCol < 0 || targetCol > COLS - 1) return;
+    if (targetRow < ROW_GOALS || targetRow > ROW_START) return;
+
+    this.frog.hopFrom = { col: this.frog.col, row: this.frog.row };
+    this.frog.col = targetCol;
+    this.frog.row = targetRow;
+    this.frog.hopT = 0;
+  }
+
+  private finishHop() {
+    this.frog.hopFrom = null;
+    this.frog.hopT = 0;
+    this.resolveCell();
+  }
+
+  private resolveCell() {
+    // Road/river/bay collision lands in later implementation steps of this spec.
+  }
+
   update(dt: number) {
     if (this.state === "gameover") return;
     this.updateLanes(dt);
-    // Frog hop/collision/timer/death-beat land in later implementation steps.
+
+    if (this.state === "playing") {
+      if (this.frog.hopFrom !== null) {
+        this.frog.hopT += dt * 1000;
+        if (this.frog.hopT >= HOP_MS) {
+          this.finishHop();
+        }
+      }
+      if (this.frog.hopFrom === null && this.pendingDirection !== null) {
+        const dir = this.pendingDirection;
+        this.pendingDirection = null;
+        this.startHop(dir);
+      }
+    }
   }
 
   private drawZones() {
@@ -281,8 +330,15 @@ export class FroggerEngine {
 
   private drawFrog() {
     const ctx = this.ctx;
-    const x = this.frog.col * CELL;
-    const y = this.frog.row * CELL;
+    let col = this.frog.col;
+    let row = this.frog.row;
+    if (this.frog.hopFrom !== null) {
+      const t = Math.min(this.frog.hopT / HOP_MS, 1);
+      col = this.frog.hopFrom.col + (this.frog.col - this.frog.hopFrom.col) * t;
+      row = this.frog.hopFrom.row + (this.frog.row - this.frog.hopFrom.row) * t;
+    }
+    const x = col * CELL;
+    const y = row * CELL;
     ctx.fillStyle = "#39d353";
     ctx.fillRect(x + 6, y + 6, CELL - 12, CELL - 12);
   }
