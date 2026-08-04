@@ -61,6 +61,8 @@ interface Lane {
   speed: number; // cells per second, always positive
   dir: 1 | -1;
   entities: Entity[];
+  trackLength: number; // cyclic length entities wrap around at, in cells
+  elapsed: number; // seconds accumulated on this lane — also drives the turtle cycle
 }
 
 interface Frog {
@@ -165,8 +167,40 @@ export class FroggerEngine {
               : 0,
         });
       }
-      return { row: t.row, speed: t.baseSpeed * speedScale, dir: t.dir, entities };
+      return {
+        row: t.row,
+        speed: t.baseSpeed * speedScale,
+        dir: t.dir,
+        entities,
+        trackLength: count * t.period,
+        elapsed: 0,
+      };
     });
+  }
+
+  // Submerged turtle groups offer no support. Both the visual state (drawLanes)
+  // and the support check (riverSupport, added later) read this off the same
+  // lane.elapsed accumulator so they can never disagree — see spec risk on the
+  // turtle cycle drifting out of sync with a distinct timer under the dt cap.
+  private isSubmerged(lane: Lane, entity: Entity): boolean {
+    if (entity.kind !== "turtle") return false;
+    const cycle = TURTLE_SURFACE_S + TURTLE_SUBMERGED_S;
+    const t = (lane.elapsed + entity.cyclePhase) % cycle;
+    return t >= TURTLE_SURFACE_S;
+  }
+
+  private updateLanes(dt: number) {
+    for (const lane of this.lanes) {
+      lane.elapsed += dt;
+      for (const entity of lane.entities) {
+        entity.col += lane.speed * lane.dir * dt;
+        if (lane.dir === 1 && entity.col > COLS) {
+          entity.col -= lane.trackLength;
+        } else if (lane.dir === -1 && entity.col < -entity.width) {
+          entity.col += lane.trackLength;
+        }
+      }
+    }
   }
 
   handleKeyDown(code: string) {
@@ -180,9 +214,10 @@ export class FroggerEngine {
     // Frogger has no press-and-hold behavior — one hop per press.
   }
 
-  update(_dt: number) {
-    // Lane motion, hop resolution, collision, timer and death beat land in
-    // later implementation steps of this spec.
+  update(dt: number) {
+    if (this.state === "gameover") return;
+    this.updateLanes(dt);
+    // Frog hop/collision/timer/death-beat land in later implementation steps.
   }
 
   private drawZones() {
@@ -228,11 +263,18 @@ export class FroggerEngine {
         const x = entity.col * CELL;
         const y = lane.row * CELL;
         if (x + entity.width * CELL < 0 || x > this.width) continue;
+        const submerged = this.isSubmerged(lane, entity);
         if (entity.kind === "car") ctx.fillStyle = "#e57373";
         else if (entity.kind === "truck") ctx.fillStyle = "#ffb74d";
         else if (entity.kind === "log") ctx.fillStyle = "#8d5524";
-        else ctx.fillStyle = "#39d353";
-        ctx.fillRect(x + 2, y + 4, entity.width * CELL - 4, CELL - 8);
+        else ctx.fillStyle = submerged ? "#0d5f3a" : "#39d353";
+        if (submerged) {
+          ctx.globalAlpha = 0.4;
+          ctx.fillRect(x + 4, y + 8, entity.width * CELL - 8, CELL - 16);
+          ctx.globalAlpha = 1;
+        } else {
+          ctx.fillRect(x + 2, y + 4, entity.width * CELL - 4, CELL - 8);
+        }
       }
     }
   }
