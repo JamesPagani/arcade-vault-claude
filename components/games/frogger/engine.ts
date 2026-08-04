@@ -247,7 +247,63 @@ export class FroggerEngine {
   }
 
   private resolveCell() {
-    // Road/river/bay collision lands in later implementation steps of this spec.
+    // Bay scoring lands in the next implementation step of this spec.
+    this.checkRoadCollision();
+    if (this.state === "playing") this.checkRiverSupport(0);
+  }
+
+  private cellOverlapsEntity(col: number, entity: Entity): boolean {
+    return col < entity.col + entity.width && col + 1 > entity.col;
+  }
+
+  private checkRoadCollision() {
+    const row = this.frog.row;
+    if (row < ROW_ROAD_TOP || row > ROW_ROAD_BOTTOM) return;
+    const lane = this.lanes.find((l) => l.row === row);
+    if (!lane) return;
+    const col = Math.round(this.frog.col);
+    if (lane.entities.some((e) => this.cellOverlapsEntity(col, e))) {
+      this.killFrog("road");
+    }
+  }
+
+  // Support loss is only evaluated while idle — checking mid-hop would drown
+  // a frog in flight between two logs. `dt` is the drift to apply this frame;
+  // pass 0 to just test support without moving (used right after landing).
+  private checkRiverSupport(dt: number) {
+    const row = this.frog.row;
+    if (row < ROW_RIVER_TOP || row > ROW_RIVER_BOTTOM) return;
+    const lane = this.lanes.find((l) => l.row === row);
+    if (!lane) return;
+    const col = Math.round(this.frog.col);
+    const support = lane.entities.find(
+      (e) => !this.isSubmerged(lane, e) && this.cellOverlapsEntity(col, e),
+    );
+    if (!support) {
+      this.killFrog("water");
+      return;
+    }
+    this.frog.col += lane.speed * lane.dir * dt;
+    if (this.frog.col < 0 || this.frog.col > COLS - 1) {
+      this.killFrog("water");
+    }
+  }
+
+  private killFrog(kind: "road" | "water") {
+    this.deathKind = kind;
+    this.lives -= 1;
+    if (this.lives <= 0) {
+      this.lives = 0;
+      this.state = "gameover";
+    } else {
+      this.respawn();
+    }
+  }
+
+  private respawn() {
+    this.frog = { col: START_COL, row: ROW_START, hopFrom: null, hopT: 0 };
+    this.pendingDirection = null;
+    this.timeLeft = this.roundTime;
   }
 
   update(dt: number) {
@@ -261,7 +317,13 @@ export class FroggerEngine {
           this.finishHop();
         }
       }
-      if (this.frog.hopFrom === null && this.pendingDirection !== null) {
+      if (this.state === "playing" && this.frog.hopFrom === null) {
+        this.checkRoadCollision();
+      }
+      if (this.state === "playing" && this.frog.hopFrom === null) {
+        this.checkRiverSupport(dt);
+      }
+      if (this.state === "playing" && this.frog.hopFrom === null && this.pendingDirection !== null) {
         const dir = this.pendingDirection;
         this.pendingDirection = null;
         this.startHop(dir);
@@ -339,8 +401,11 @@ export class FroggerEngine {
     }
     const x = col * CELL;
     const y = row * CELL;
-    ctx.fillStyle = "#39d353";
+    ctx.fillStyle = "#c6ff00";
+    ctx.strokeStyle = "#0a0a18";
+    ctx.lineWidth = 2;
     ctx.fillRect(x + 6, y + 6, CELL - 12, CELL - 12);
+    ctx.strokeRect(x + 6, y + 6, CELL - 12, CELL - 12);
   }
 
   private drawHud() {
