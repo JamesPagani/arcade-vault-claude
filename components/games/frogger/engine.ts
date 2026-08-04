@@ -331,15 +331,17 @@ export class FroggerEngine {
     }
   }
 
+  private isRiverRow(row: number): boolean {
+    return row >= ROW_RIVER_TOP && row <= ROW_RIVER_BOTTOM;
+  }
+
+  // Enters the ~700 ms death beat: lanes keep moving, input is ignored
+  // (handleKeyDown gates on state === "playing"), and the frog draws as a
+  // splat/bubble. The life is only deducted once the beat completes, in update().
   private killFrog(kind: "road" | "water") {
     this.deathKind = kind;
-    this.lives -= 1;
-    if (this.lives <= 0) {
-      this.lives = 0;
-      this.state = "gameover";
-    } else {
-      this.respawn();
-    }
+    this.state = "dying";
+    this.deathT = 0;
   }
 
   private respawn() {
@@ -365,10 +367,32 @@ export class FroggerEngine {
       if (this.state === "playing" && this.frog.hopFrom === null) {
         this.checkRiverSupport(dt);
       }
+      // Stops draining the instant killFrog flips the state to "dying" —
+      // otherwise a timeout could fire a second death on the same mistake.
+      if (this.state === "playing") {
+        this.timeLeft -= dt;
+        if (this.timeLeft <= 0) {
+          this.timeLeft = 0;
+          this.killFrog(this.isRiverRow(this.frog.row) ? "water" : "road");
+        }
+      }
       if (this.state === "playing" && this.frog.hopFrom === null && this.pendingDirection !== null) {
         const dir = this.pendingDirection;
         this.pendingDirection = null;
         this.startHop(dir);
+      }
+    } else if (this.state === "dying") {
+      this.deathT += dt * 1000;
+      if (this.deathT >= DEATH_MS) {
+        this.deathT = 0;
+        this.lives -= 1;
+        if (this.lives <= 0) {
+          this.lives = 0;
+          this.state = "gameover";
+        } else {
+          this.state = "playing";
+          this.respawn();
+        }
       }
     }
   }
@@ -434,6 +458,22 @@ export class FroggerEngine {
 
   private drawFrog() {
     const ctx = this.ctx;
+    if (this.state === "dying") {
+      const x = Math.round(this.frog.col) * CELL;
+      const y = this.frog.row * CELL;
+      if (this.deathKind === "water") {
+        ctx.strokeStyle = "#8ecae6";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(x + CELL / 2, y + CELL / 2, CELL / 3, 0, Math.PI * 2);
+        ctx.stroke();
+      } else {
+        ctx.fillStyle = "#7a1f1f";
+        ctx.fillRect(x + 4, y + CELL / 2 - 4, CELL - 8, 8);
+      }
+      return;
+    }
+
     let col = this.frog.col;
     let row = this.frog.row;
     if (this.frog.hopFrom !== null) {
@@ -477,6 +517,17 @@ export class FroggerEngine {
     }
   }
 
+  private drawOverlay() {
+    const ctx = this.ctx;
+    ctx.textAlign = "center";
+    ctx.fillStyle = "#e57373";
+    ctx.font = "bold 32px monospace";
+    ctx.fillText("FIN DEL JUEGO", this.width / 2, this.height / 2 - 12);
+    ctx.font = "16px monospace";
+    ctx.fillStyle = "#e6e6e6";
+    ctx.fillText(`PUNTAJE: ${this.score}`, this.width / 2, this.height / 2 + 18);
+  }
+
   draw() {
     this.drawZones();
     this.drawBays();
@@ -484,5 +535,6 @@ export class FroggerEngine {
     this.drawFrog();
     this.drawHud();
     this.drawTimerBar();
+    if (this.state === "gameover") this.drawOverlay();
   }
 }
