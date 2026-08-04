@@ -247,9 +247,51 @@ export class FroggerEngine {
   }
 
   private resolveCell() {
-    // Bay scoring lands in the next implementation step of this spec.
-    this.checkRoadCollision();
-    if (this.state === "playing") this.checkRiverSupport(0);
+    this.checkRowProgress();
+    if (this.frog.row === ROW_GOALS) {
+      this.checkGoalCell();
+    } else {
+      this.checkRoadCollision();
+      if (this.state === "playing") this.checkRiverSupport(0);
+    }
+  }
+
+  // +10 the first time a round reaches a row closer to the goal than before —
+  // tracked via furthestRow so re-crossing the same row scores nothing more.
+  private checkRowProgress() {
+    if (this.frog.row < this.furthestRow) {
+      this.score += POINTS_ROW;
+      this.furthestRow = this.frog.row;
+    }
+  }
+
+  private checkGoalCell() {
+    const idx = GOAL_COLS.indexOf(Math.round(this.frog.col));
+    if (idx === -1 || this.bays[idx]) {
+      this.killFrog("road");
+      return;
+    }
+    this.enterBay(idx);
+  }
+
+  private enterBay(idx: number) {
+    this.bays[idx] = true;
+    this.score += POINTS_BAY + Math.ceil(this.timeLeft) * POINTS_TIME_PER_SECOND;
+    if (this.bays.every(Boolean)) {
+      this.completeRound();
+    } else {
+      this.respawn();
+    }
+  }
+
+  private completeRound() {
+    this.score += POINTS_ROUND;
+    this.level += 1;
+    this.lanes = this.buildLanes(this.level);
+    this.bays = [false, false, false, false, false];
+    this.furthestRow = ROW_START;
+    this.roundTime = Math.max(MIN_ROUND_TIME, BASE_ROUND_TIME - (this.level - 1));
+    this.respawn();
   }
 
   private cellOverlapsEntity(col: number, entity: Entity): boolean {
