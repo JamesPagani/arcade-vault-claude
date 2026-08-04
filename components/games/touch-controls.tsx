@@ -28,15 +28,15 @@ function TouchButton({
 }) {
   const { code, mode, enabled } = mapping;
 
-  const start = (e: React.TouchEvent<HTMLButtonElement>) => {
-    e.preventDefault();
+  // touch-action: none (CSS) already suppresses scroll/zoom on these buttons;
+  // React attaches touch listeners as passive, so preventDefault() here would throw.
+  const start = () => {
     if (!enabled) return;
     targetRef.current?.handleKeyDown(code);
     if (mode === "tap") targetRef.current?.handleKeyUp(code);
   };
 
-  const end = (e: React.TouchEvent<HTMLButtonElement>) => {
-    e.preventDefault();
+  const end = () => {
     if (!enabled || mode === "tap") return;
     targetRef.current?.handleKeyUp(code);
   };

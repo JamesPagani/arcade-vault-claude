@@ -1,4 +1,4 @@
-import type { ComponentType } from "react";
+import type { ComponentType, RefAttributes } from "react";
 import { ArkanoidCanvas } from "@/components/games/arkanoid/arkanoid-canvas";
 import { AsteroidsCanvas } from "@/components/games/asteroids/asteroids-canvas";
 import { SnakeCanvas } from "@/components/games/snake/snake-canvas";
@@ -18,7 +18,10 @@ export interface GameCanvasProps {
   skin?: SkinId;
 }
 
-export const GAME_ENGINES: Record<string, ComponentType<GameCanvasProps>> = {
+export const GAME_ENGINES: Record<
+  string,
+  ComponentType<GameCanvasProps & RefAttributes<GameControlsHandle>>
+> = {
   arkanoid: ArkanoidCanvas,
   asteroids: AsteroidsCanvas,
   snake: SnakeCanvas,
