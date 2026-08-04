@@ -135,6 +135,17 @@ export const GAMES: Game[] = [
     plays: "0",
   },
   {
+    id: "frogger",
+    title: "FROGGER",
+    short: "Cruza la carretera y el río sin convertirte en papilla.",
+    long: "Guía a tu rana por una autopista repleta de coches y camiones, y después por un río de troncos a la deriva y tortugas que se sumergen sin avisar. Llena las cinco bocas del otro lado para completar la ronda: cada nivel acelera el tráfico y acorta el reloj. Tres vidas, mucho asfalto y muy poca agua firme.",
+    cat: "ARCADE",
+    cover: "cover-rana",
+    color: "green",
+    best: 0,
+    plays: "0",
+  },
+  {
     id: "duelo-pixel",
     title: "DUELO PIXEL",
     short: "Dos paletas. Una pelota. Reflejos máximos.",

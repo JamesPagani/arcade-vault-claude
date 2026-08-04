@@ -1,6 +1,6 @@
 # Frogger Core Integration: original grid-hop engine on the platform contract
 
-- **Status:** Draft
+- **Status:** Approved
 - **Dependencies:** 05-asteroids-integration (engine/canvas contract), 06-games-and-scores-supabase (games/scores schema), 10-mobile-touch-controls (touch-control contract)
 - **Date:** 2026-08-04
 - **Objective:** Add Frogger to Arcade Vault as a real playable game — an original 13×16 grid-hop engine (road traffic, river of logs and submerging turtles, five goal bays, round timer) wired into the catalog, Supabase, `GAME_ENGINES` and `GAME_TOUCH_CONTROLS`, with `GamePlayer` handling HUD, pause, restart and score saving unchanged.
