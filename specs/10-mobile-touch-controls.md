@@ -1,6 +1,6 @@
 # 10 - Mobile Touch Controls: D-pad and A/B buttons for all playable games
 
-- **Status:** Approved
+- **Status:** Implemented
 - **Dependencies:** 05-asteroids-integration (canvas/engine contract), 07-tetris-integration, 08-arkanoid-integration, 09-snake-integration (canvas/engine contract of the 4 existing games)
 - **Date:** 2026-08-03
 - **Objective:** Add touch controls (directional D-pad + A/B action buttons) to the four playable games, shown automatically on touch-pointer devices and coexisting with keyboard input, via a centralized per-game declarative mapping.
@@ -99,17 +99,17 @@ No Supabase/schema changes — this feature introduces no persisted data.
 
 ## Acceptance Criteria
 
-- [ ] On a touch-pointer viewport, a control bar (D-pad + A/B) renders below the canvas for all 4 playable games.
-- [ ] On a mouse-pointer viewport (no coarse pointer), the control bar does not render.
-- [ ] Asteroids: ↑/←/→/A respond while held (continuous thrust/rotate/fire); ↓/B are dimmed and inert.
-- [ ] Arkanoid: ←/→ respond while held; ↑/↓/A/B are dimmed and inert.
-- [ ] Snake: ↑/↓/←/→ respond while held; A/B are dimmed and inert.
-- [ ] Tetris: ←/→/↓ respond while held (move/soft-drop); ↑ (rotate) and A (hard drop) fire exactly once per touch, not repeatedly while held; B is dimmed and inert.
-- [ ] Releasing a "hold" button stops the corresponding action immediately (e.g. ship stops thrusting).
-- [ ] Keyboard controls on desktop are unaffected — all 4 games play identically to before this spec.
-- [ ] PAUSA/game-over/restart flows are unaffected by the presence of touch controls.
-- [ ] No console errors during a touch playthrough of any of the 4 games.
-- [ ] `npm run build` completes cleanly.
+- [x] On a touch-pointer viewport, a control bar (D-pad + A/B) renders below the canvas for all 4 playable games.
+- [x] On a mouse-pointer viewport (no coarse pointer), the control bar does not render.
+- [x] Asteroids: ↑/←/→/A respond while held (continuous thrust/rotate/fire); ↓/B are dimmed and inert.
+- [x] Arkanoid: ←/→ respond while held; ↑/↓/A/B are dimmed and inert.
+- [x] Snake: ↑/↓/←/→ respond while held; A/B are dimmed and inert.
+- [x] Tetris: ←/→/↓ respond while held (move/soft-drop); ↑ (rotate) and A (hard drop) fire exactly once per touch, not repeatedly while held; B is dimmed and inert.
+- [x] Releasing a "hold" button stops the corresponding action immediately (e.g. ship stops thrusting).
+- [x] Keyboard controls on desktop are unaffected — all 4 games play identically to before this spec.
+- [x] PAUSA/game-over/restart flows are unaffected by the presence of touch controls.
+- [x] No console errors during a touch playthrough of any of the 4 games.
+- [x] `npm run build` completes cleanly.
 
 ## Decisions Taken and Discarded
 
