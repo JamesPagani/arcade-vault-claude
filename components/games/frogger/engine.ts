@@ -1,5 +1,8 @@
 // Original engine — no template exists for Frogger in references/templates/started-games/.
 
+import { DEFAULT_SKIN, type SkinId } from "@/components/games/skins";
+import { FROGGER_PALETTES, type FroggerPalette } from "@/components/games/frogger/skins";
+
 export type FroggerState = "playing" | "dying" | "gameover";
 
 export interface FroggerSnapshot {
@@ -107,6 +110,7 @@ export class FroggerEngine {
   private ctx: CanvasRenderingContext2D;
   private width: number;
   private height: number;
+  private palette: FroggerPalette;
 
   private lanes: Lane[] = [];
   private frog: Frog = { col: START_COL, row: ROW_START, hopFrom: null, hopT: 0 };
@@ -124,11 +128,21 @@ export class FroggerEngine {
   private deathT = 0;
   private deathKind: "road" | "water" | null = null;
 
-  constructor(ctx: CanvasRenderingContext2D, width: number, height: number) {
+  constructor(
+    ctx: CanvasRenderingContext2D,
+    width: number,
+    height: number,
+    skin: SkinId = DEFAULT_SKIN,
+  ) {
     this.ctx = ctx;
     this.width = width;
     this.height = height;
+    this.palette = FROGGER_PALETTES[skin];
     this.reset();
+  }
+
+  setSkin(id: SkinId) {
+    this.palette = FROGGER_PALETTES[id];
   }
 
   reset() {
@@ -399,35 +413,37 @@ export class FroggerEngine {
 
   private drawZones() {
     const ctx = this.ctx;
-    ctx.fillStyle = "#0a0a18";
+    const palette = this.palette;
+    ctx.fillStyle = palette.background;
     ctx.fillRect(0, 0, this.width, this.height);
 
-    ctx.fillStyle = "#123018";
+    ctx.fillStyle = palette.goalZone;
     ctx.fillRect(0, ROW_GOALS * CELL, this.width, CELL);
 
-    ctx.fillStyle = "#0d2b4a";
+    ctx.fillStyle = palette.riverZone;
     ctx.fillRect(0, ROW_RIVER_TOP * CELL, this.width, (ROW_RIVER_BOTTOM - ROW_RIVER_TOP + 1) * CELL);
 
-    ctx.fillStyle = "#1a1a1a";
+    ctx.fillStyle = palette.median;
     ctx.fillRect(0, ROW_MEDIAN * CELL, this.width, CELL);
 
-    ctx.fillStyle = "#2a2a2a";
+    ctx.fillStyle = palette.roadZone;
     ctx.fillRect(0, ROW_ROAD_TOP * CELL, this.width, (ROW_ROAD_BOTTOM - ROW_ROAD_TOP + 1) * CELL);
 
-    ctx.fillStyle = "#1a1a1a";
+    ctx.fillStyle = palette.startZone;
     ctx.fillRect(0, ROW_START * CELL, this.width, CELL);
   }
 
   private drawBays() {
     const ctx = this.ctx;
+    const palette = this.palette;
     for (let col = 0; col < COLS; col++) {
       const isGoal = GOAL_COLS.includes(col);
       if (isGoal) {
         const filled = this.bays[GOAL_COLS.indexOf(col)];
-        ctx.fillStyle = filled ? "#39d353" : "#08130a";
+        ctx.fillStyle = filled ? palette.goalCellFilled : palette.goalCellEmpty;
         ctx.fillRect(col * CELL + 2, ROW_GOALS * CELL + 2, CELL - 4, CELL - 4);
       } else {
-        ctx.fillStyle = "#0b3d16";
+        ctx.fillStyle = palette.shoreCell;
         ctx.fillRect(col * CELL, ROW_GOALS * CELL, CELL, CELL);
       }
     }
@@ -435,16 +451,18 @@ export class FroggerEngine {
 
   private drawLanes() {
     const ctx = this.ctx;
+    const palette = this.palette;
     for (const lane of this.lanes) {
       for (const entity of lane.entities) {
         const x = entity.col * CELL;
         const y = lane.row * CELL;
         if (x + entity.width * CELL < 0 || x > this.width) continue;
         const submerged = this.isSubmerged(lane, entity);
-        if (entity.kind === "car") ctx.fillStyle = "#e57373";
-        else if (entity.kind === "truck") ctx.fillStyle = "#ffb74d";
-        else if (entity.kind === "log") ctx.fillStyle = "#8d5524";
-        else ctx.fillStyle = submerged ? "#0d5f3a" : "#39d353";
+        if (entity.kind === "car") ctx.fillStyle = palette.car;
+        else if (entity.kind === "truck") ctx.fillStyle = palette.truck;
+        else if (entity.kind === "log") ctx.fillStyle = palette.log;
+        else ctx.fillStyle = submerged ? palette.turtleSubmerged : palette.turtleSurfaced;
+        ctx.shadowColor = ctx.fillStyle;
         if (submerged) {
           ctx.globalAlpha = 0.4;
           ctx.fillRect(x + 4, y + 8, entity.width * CELL - 8, CELL - 16);
@@ -458,17 +476,20 @@ export class FroggerEngine {
 
   private drawFrog() {
     const ctx = this.ctx;
+    const palette = this.palette;
     if (this.state === "dying") {
       const x = Math.round(this.frog.col) * CELL;
       const y = this.frog.row * CELL;
       if (this.deathKind === "water") {
-        ctx.strokeStyle = "#8ecae6";
+        ctx.strokeStyle = palette.frogDeathWater;
+        ctx.shadowColor = palette.frogDeathWater;
         ctx.lineWidth = 2;
         ctx.beginPath();
         ctx.arc(x + CELL / 2, y + CELL / 2, CELL / 3, 0, Math.PI * 2);
         ctx.stroke();
       } else {
-        ctx.fillStyle = "#7a1f1f";
+        ctx.fillStyle = palette.frogDeathRoad;
+        ctx.shadowColor = palette.frogDeathRoad;
         ctx.fillRect(x + 4, y + CELL / 2 - 4, CELL - 8, 8);
       }
       return;
@@ -483,8 +504,9 @@ export class FroggerEngine {
     }
     const x = col * CELL;
     const y = row * CELL;
-    ctx.fillStyle = "#c6ff00";
-    ctx.strokeStyle = "#0a0a18";
+    ctx.fillStyle = palette.frogAlive;
+    ctx.strokeStyle = palette.frogOutline;
+    ctx.shadowColor = palette.frogAlive;
     ctx.lineWidth = 2;
     ctx.fillRect(x + 6, y + 6, CELL - 12, CELL - 12);
     ctx.strokeRect(x + 6, y + 6, CELL - 12, CELL - 12);
@@ -492,7 +514,8 @@ export class FroggerEngine {
 
   private drawHud() {
     const ctx = this.ctx;
-    ctx.fillStyle = "#e6e6e6";
+    ctx.fillStyle = this.palette.hudText;
+    ctx.shadowColor = this.palette.hudText;
     ctx.font = "15px monospace";
     ctx.textAlign = "left";
     ctx.fillText(`PUNTAJE ${this.score}`, 8, ROW_HUD * CELL + 26);
@@ -502,14 +525,18 @@ export class FroggerEngine {
 
   private drawTimerBar() {
     const ctx = this.ctx;
+    const palette = this.palette;
     const barY = ROW_BOTTOM_BAR * CELL;
     const ratio = Math.max(0, this.timeLeft / this.roundTime);
-    ctx.fillStyle = "#1a1a1a";
+    ctx.fillStyle = palette.timerBarBg;
     ctx.fillRect(8, barY + 8, this.width - 16, 10);
-    ctx.fillStyle = ratio > 0.5 ? "#39d353" : ratio > 0.25 ? "#ffd54f" : "#e57373";
+    ctx.fillStyle =
+      ratio > 0.5 ? palette.timerHigh : ratio > 0.25 ? palette.timerMid : palette.timerLow;
+    ctx.shadowColor = ctx.fillStyle;
     ctx.fillRect(8, barY + 8, (this.width - 16) * ratio, 10);
 
-    ctx.fillStyle = "#e6e6e6";
+    ctx.fillStyle = palette.hudText;
+    ctx.shadowColor = palette.hudText;
     ctx.font = "13px monospace";
     ctx.textAlign = "left";
     for (let i = 0; i < this.lives; i++) {
@@ -519,22 +546,33 @@ export class FroggerEngine {
 
   private drawOverlay() {
     const ctx = this.ctx;
+    const palette = this.palette;
     ctx.textAlign = "center";
-    ctx.fillStyle = "#e57373";
+    ctx.fillStyle = palette.overlayTitle;
+    ctx.shadowColor = palette.overlayTitle;
     ctx.font = "bold 32px monospace";
     ctx.fillText("FIN DEL JUEGO", this.width / 2, this.height / 2 - 12);
     ctx.font = "16px monospace";
-    ctx.fillStyle = "#e6e6e6";
+    ctx.fillStyle = palette.hudText;
+    ctx.shadowColor = palette.hudText;
     ctx.fillText(`PUNTAJE: ${this.score}`, this.width / 2, this.height / 2 + 18);
   }
 
   draw() {
+    // Reset shadowBlur before painting the background so no glow bleeds in from the
+    // previous frame — same pattern as asteroids/arkanoid/snake. Zones/bays are backdrop,
+    // not entities, so they stay glow-free; shadowBlur turns on once we reach the things a
+    // skin should make glow (lanes, frog, HUD, overlay), and each of those sets its own
+    // shadowColor to match its own fillStyle rather than sharing one blanket color.
+    this.ctx.shadowBlur = 0;
     this.drawZones();
     this.drawBays();
+    this.ctx.shadowBlur = this.palette.glowBlur;
     this.drawLanes();
     this.drawFrog();
     this.drawHud();
     this.drawTimerBar();
     if (this.state === "gameover") this.drawOverlay();
+    this.ctx.shadowBlur = 0;
   }
 }

@@ -143,3 +143,67 @@ enhebrar la paleta como segundo argumento en ningún sitio.
   `draw()` fuerza `ctx.shadowBlur = 0` justo antes de pintar el fondo para que ningún brillo se arrastre entre
   fotogramas, y como `drawFood()` corre después de `drawWalls()` (que ya restaura `shadowBlur` a 0) y antes de
   `drawSnake()` (que fija el suyo propio), el sprite de la fruta nunca hereda brillo ajeno.
+
+## 2026-08-04 — frogger
+
+La costura de plataforma ya existía (construida en la invocación de asteroids); esta ejecución solo tocó
+`components/games/frogger/skins.ts`, `engine.ts` y `frogger-canvas.tsx`. Frogger no tenía fila propia en la
+tabla de peligros del README (se añadió después de tetris/snake/asteroids/arkanoid), pero resultó ser del
+mismo perfil que snake y asteroids: una sola clase de motor, sin clases auxiliares con `draw(ctx)` propio, así
+que todo el color se lee de `this.palette` directamente. La única fricción real fue que el motor original no
+usaba `shadowBlur`/`shadowColor` en absoluto, así que hubo que decidir dónde entra el brillo: se dejó
+`drawZones`/`drawBays` (fondo y bahías, que son decorado, no entidades) sin `shadowColor`, y se activó
+`ctx.shadowBlur = palette.glowBlur` solo a partir de `drawLanes` (carriles, rana, HUD, overlay), con cada sitio
+fijando su propio `shadowColor` igual a su propio `fillStyle`/`strokeStyle` en vez de un color compartido —
+si no, todo el brillo habría salido teñido del color de la rana.
+
+- **Skins añadidas:** clásico (por defecto), neón, retro
+
+- **Paleta clásica:** transcripción literal de `components/games/frogger/engine.ts` antes del refactor: fondo
+  `#0a0a18` · franja de meta `#123018` · franja de río `#0d2b4a` · mediana `#1a1a1a` · franja de carretera
+  `#2a2a2a` · franja de salida `#1a1a1a` (igual que la mediana, así estaba en el original) · bahía vacía
+  `#08130a` · bahía llena `#39d353` · celda de orilla `#0b3d16` · auto `#e57373` · camión `#ffb74d` · tronco
+  `#8d5524` · tortuga en superficie `#39d353` (mismo verde que la bahía llena, así estaba en el original) ·
+  tortuga sumergida `#0d5f3a` · rana viva `#c6ff00` · contorno de la rana `#0a0a18` · ondas de ahogamiento
+  `#8ecae6` · mancha de atropello `#7a1f1f` · texto de HUD/vidas/subtítulo `#e6e6e6` (un solo literal para las
+  tres, así estaba en el original — ver más abajo) · fondo de barra de tiempo `#1a1a1a` · barra alta `#39d353`
+  · barra media `#ffd54f` · barra baja `#e57373` · título de fin de partida `#e57373`. `glowBlur: 0`, así que
+  `ctx.shadowBlur` queda en 0 durante todo `draw()` y `clásico` renderiza exactamente lo mismo que antes.
+
+- **Neón:** hex de `:root` copiados a mano (el motor no lee variables CSS): fondo `#0a0a0f` (`--bg`). La rana
+  (jugador) usa `--ink` `#e6e9ff` en vez de un tono de sitio, porque es la única entidad que cruza los tres
+  fondos (meta, río, carretera) y ningún neón único se lee igual de bien sobre los tres — el mismo criterio
+  que arkanoid usó para su pelota. Los peligros de carretera se separan por tono: auto `--magenta` `#ff006e`,
+  camión `--yellow` `#f5ff00`. Los soportes de río también por tono: tronco `--cyan` `#00f5ff`, tortuga en
+  superficie `--green` `#00ff88`. La tortuga sumergida no cambia de tono respecto a la de superficie — usa un
+  verde oscuro (`#0a4d31`) de la misma familia, y conserva el alfa 0.4 original del motor, así que "sin
+  soporte" se sigue leyendo como la misma entidad apagándose, no como un tono distinto. Bahía llena en
+  `--green`, ondas de ahogamiento en `--cyan` (agua), mancha de atropello en `--magenta` (carretera). Texto de
+  HUD en `--ink`. La barra de tiempo usa `--green`/`--yellow`/`--magenta` para alto/medio/bajo — se sustituyó
+  el rojo original por magenta porque el sitio no define un neón rojo. `glowBlur: 12`.
+
+- **Retro:** mismo fósforo ámbar y la misma escala de cuatro escalones ya fijada en asteroids/arkanoid/snake —
+  L4 `#ffe8b0` · L3 `#ffb000` · L2 `#c07800` · fondo `#140d00`. La rana (jugador) es siempre L4, lo más
+  brillante. Auto y camión se aplanan al mismo L2: distinguir uno de otro es cosmético aquí, no una pareja que
+  colisiona entre sí, así que aplanarlos es la calibración correcta en vez de colar un segundo tono (mismo
+  razonamiento que aplanó las seis filas de ladrillos en arkanoid). Tronco y tortuga en superficie van en L3,
+  un escalón completo por encima de los peligros de carretera y uno por debajo de la rana. La tortuga
+  sumergida reutiliza L3 en vez de inventar un quinto escalón: el alfa 0.4 que ya trae el motor la atenúa
+  frente a la tortuga en superficie, así que "brillo, no tono" se cumple sin un valor que nadie más usa. La
+  barra de tiempo corre en reversa — tenue mientras sobra tiempo, más brillante cuanto menos queda — para que
+  el momento que exige atención sea también el momento en que el fósforo brilla más. Texto de HUD en L3,
+  título de fin de partida en L4. `glowBlur: 6`.
+
+- **Sin vestir:** nada visual queda fuera — Frogger es vectorial puro (rectángulos, un arco y texto), sin
+  `drawImage` ni sprites, así que las tres skins cubren el 100% de lo dibujado. El alfa `0.4` de la tortuga
+  sumergida y el propio `HOP_MS`/`DEATH_MS` no se tocaron: son temporización y alfa de composición, no color,
+  y quedan fuera de alcance por contrato. Fuera de alcance por contrato (no por olvido): `.crt`, `.player-hud`,
+  `:root` y `.cover-frogger`.
+
+- **Riesgos:** cada sitio de color fija su propio `ctx.shadowColor` justo antes de dibujar (patrón `glow` "en
+  línea", no `save()`/`restore()`), igual que asteroids/arkanoid/snake — quien añada un nuevo elemento dibujado
+  debe fijar su propio `shadowColor` en vez de asumir que hereda el de un elemento anterior. `drawZones` y
+  `drawBays` corren con `shadowBlur = 0` (antes de que `draw()` lo suba a `palette.glowBlur`), así que el
+  fondo y las bahías nunca brillan aunque su color coincida con el de una entidad (p. ej. bahía llena y
+  tortuga en superficie comparten `#39d353` en clásico) — es intencional, el brillo es para entidades, no para
+  el decorado.

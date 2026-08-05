@@ -1,6 +1,6 @@
 # Frogger Core Integration: original grid-hop engine on the platform contract
 
-- **Status:** Approved
+- **Status:** Implemented
 - **Dependencies:** 05-asteroids-integration (engine/canvas contract), 06-games-and-scores-supabase (games/scores schema), 10-mobile-touch-controls (touch-control contract)
 - **Date:** 2026-08-04
 - **Objective:** Add Frogger to Arcade Vault as a real playable game — an original 13×16 grid-hop engine (road traffic, river of logs and submerging turtles, five goal bays, round timer) wired into the catalog, Supabase, `GAME_ENGINES` and `GAME_TOUCH_CONTROLS`, with `GamePlayer` handling HUD, pause, restart and score saving unchanged.
@@ -200,36 +200,36 @@ Registry, dispatcher, data layer and touch-control host all already exist; this 
 
 ## Acceptance Criteria
 
-- [ ] The `frogger` row exists in the Supabase `games` table with exactly the Data Model values (`cat: ARCADE`, `cover: cover-rana`, `color: green`).
-- [ ] A `FROGGER` card appears on `/juegos` and on the landing rail, distinct from and alongside the existing `RANARIA` card.
-- [ ] `/juegos/frogger` renders via `getGame("frogger")` with the real row's copy, cover and leaderboard.
-- [ ] `/juegos/frogger/jugar` renders `GamePlayer` with the real `FroggerCanvas` (not the mock score simulation).
-- [ ] The 520×640 canvas shows the seven zones distinctly: HUD strip, goal row with five bays and hedge, six river lanes, median, five road lanes, start row, bottom bar.
-- [ ] The five bays sit at columns 0, 3, 6, 9 and 12; the frog spawns at row 14, column 6.
-- [ ] One direction key press moves the frog exactly one cell, animated over ~120 ms; a press during a hop is buffered as at most one pending direction.
-- [ ] The frog cannot leave columns 0–12, cannot enter row 0 or row 15, and cannot move below row 14.
-- [ ] Road entities loop horizontally with per-lane speed and direction, re-entering from the opposite edge, with passable gaps.
-- [ ] River logs and turtle groups loop the same way; turtle groups alternate 3 s surfaced / 1.5 s submerged and are visibly out of phase with each other.
-- [ ] Contact with any car or truck kills the frog.
-- [ ] Standing in a river lane with no log or surfaced turtle beneath it kills the frog.
-- [ ] The frog drifts with the log or turtle group it stands on, and dies if carried past either lateral edge.
-- [ ] A turtle group submerging beneath the frog kills it.
-- [ ] The round timer drains, shifts green → yellow → red, and reaching zero kills the frog.
-- [ ] Reaching a free bay fills it, scores +50 plus `ceil(remaining) × 10`, and returns the frog to the start row.
-- [ ] Landing on a hedge cell of the goal row, or on an already-filled bay, kills the frog.
-- [ ] Advancing to a row not yet reached this round scores +10, and re-crossing that row in the same round scores nothing more.
-- [ ] Filling all five bays scores +200, increments `level`, empties the bays, rebuilds the lanes ~15 % faster, and shortens the timer by 1 s (floored at 8 s).
-- [ ] Each death shows the ~700 ms splat/bubble beat with lanes still moving and input ignored, then respawns the frog with a fresh timer.
-- [ ] `GamePlayer`'s React HUD tracks score, `♥` lives (3 → 0) and level in real time, with no change to `game-player.tsx`.
-- [ ] PAUSA freezes lanes, hop, timer and submersion cycles; REANUDAR resumes from the identical state with no dt spike or teleport.
-- [ ] The third death fires `onGameOver` exactly once and opens the save-score modal with the real final score.
-- [ ] Saving inserts a `scores` row for `game_id = "frogger"` (verified via `execute_sql`) that ranks correctly on `/juegos/frogger` and `/salon-de-la-fama`.
-- [ ] JUGAR DE NUEVO fully resets: score 0, lives 3, level 1, bays empty, lanes at base speed, timer at 15 s, frog at row 14 / column 6.
-- [ ] Arrow keys and WASD affect the game only while the canvas is focused and never scroll the page.
-- [ ] On a touch viewport the four direction buttons each produce exactly one hop per tap and do not auto-repeat while held; the `a`/`b` buttons are disabled.
-- [ ] The canvas scales without horizontal overflow, letterboxed inside `.crt-screen` like Tetris.
-- [ ] Asteroids, Tetris, Arkanoid, Snake and every placeholder entry are unregressed; no console errors during a full playthrough.
-- [ ] `npm run build` completes clean.
+- [x] The `frogger` row exists in the Supabase `games` table with exactly the Data Model values (`cat: ARCADE`, `cover: cover-rana`, `color: green`).
+- [x] A `FROGGER` card appears on `/juegos` and on the landing rail, distinct from and alongside the existing `RANARIA` card.
+- [x] `/juegos/frogger` renders via `getGame("frogger")` with the real row's copy, cover and leaderboard.
+- [x] `/juegos/frogger/jugar` renders `GamePlayer` with the real `FroggerCanvas` (not the mock score simulation).
+- [x] The 520×640 canvas shows the seven zones distinctly: HUD strip, goal row with five bays and hedge, six river lanes, median, five road lanes, start row, bottom bar.
+- [x] The five bays sit at columns 0, 3, 6, 9 and 12; the frog spawns at row 14, column 6.
+- [x] One direction key press moves the frog exactly one cell, animated over ~120 ms; a press during a hop is buffered as at most one pending direction.
+- [x] The frog cannot leave columns 0–12, cannot enter row 0 or row 15, and cannot move below row 14.
+- [x] Road entities loop horizontally with per-lane speed and direction, re-entering from the opposite edge, with passable gaps.
+- [x] River logs and turtle groups loop the same way; turtle groups alternate 3 s surfaced / 1.5 s submerged and are visibly out of phase with each other.
+- [x] Contact with any car or truck kills the frog.
+- [x] Standing in a river lane with no log or surfaced turtle beneath it kills the frog.
+- [x] The frog drifts with the log or turtle group it stands on, and dies if carried past either lateral edge.
+- [x] A turtle group submerging beneath the frog kills it.
+- [x] The round timer drains, shifts green → yellow → red, and reaching zero kills the frog.
+- [x] Reaching a free bay fills it, scores +50 plus `ceil(remaining) × 10`, and returns the frog to the start row.
+- [x] Landing on a hedge cell of the goal row, or on an already-filled bay, kills the frog.
+- [x] Advancing to a row not yet reached this round scores +10, and re-crossing that row in the same round scores nothing more.
+- [x] Filling all five bays scores +200, increments `level`, empties the bays, rebuilds the lanes ~15 % faster, and shortens the timer by 1 s (floored at 8 s).
+- [x] Each death shows the ~700 ms splat/bubble beat with lanes still moving and input ignored, then respawns the frog with a fresh timer.
+- [x] `GamePlayer`'s React HUD tracks score, `♥` lives (3 → 0) and level in real time, with no change to `game-player.tsx`.
+- [x] PAUSA freezes lanes, hop, timer and submersion cycles; REANUDAR resumes from the identical state with no dt spike or teleport.
+- [x] The third death fires `onGameOver` exactly once and opens the save-score modal with the real final score.
+- [x] Saving inserts a `scores` row for `game_id = "frogger"` (verified via `execute_sql`) that ranks correctly on `/juegos/frogger` and `/salon-de-la-fama`.
+- [x] JUGAR DE NUEVO fully resets: score 0, lives 3, level 1, bays empty, lanes at base speed, timer at 15 s, frog at row 14 / column 6.
+- [x] Arrow keys and WASD affect the game only while the canvas is focused and never scroll the page.
+- [x] On a touch viewport the four direction buttons each produce exactly one hop per tap and do not auto-repeat while held; the `a`/`b` buttons are disabled.
+- [x] The canvas scales without horizontal overflow, letterboxed inside `.crt-screen` like Tetris.
+- [x] Asteroids, Tetris, Arkanoid, Snake and every placeholder entry are unregressed; no console errors during a full playthrough.
+- [x] `npm run build` completes clean.
 
 ## Decisions Taken and Discarded
 

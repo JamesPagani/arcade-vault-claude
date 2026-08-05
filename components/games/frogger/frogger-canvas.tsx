@@ -5,6 +5,7 @@ import {
   FroggerEngine,
   type FroggerSnapshot,
 } from "@/components/games/frogger/engine";
+import { DEFAULT_SKIN, type SkinId } from "@/components/games/skins";
 import type { GameControlsHandle } from "@/components/games/registry";
 
 const WIDTH = 520;
@@ -25,11 +26,12 @@ export interface FroggerCanvasProps {
   onSnapshot: (snapshot: FroggerSnapshot) => void;
   onGameOver: (finalScore: number) => void;
   restartSignal: number;
+  skin?: SkinId;
 }
 
 export const FroggerCanvas = forwardRef<GameControlsHandle, FroggerCanvasProps>(
   function FroggerCanvas(
-    { paused, onSnapshot, onGameOver, restartSignal },
+    { paused, onSnapshot, onGameOver, restartSignal, skin = DEFAULT_SKIN },
     ref,
   ) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -38,6 +40,9 @@ export const FroggerCanvas = forwardRef<GameControlsHandle, FroggerCanvasProps>(
     const onSnapshotRef = useRef(onSnapshot);
     const onGameOverRef = useRef(onGameOver);
     const wasGameOverRef = useRef(false);
+    // Read through a ref so the mount-only rAF effect keeps its empty dependency array;
+    // later changes arrive through the imperative setSkin effect below.
+    const initialSkinRef = useRef(skin);
 
     useEffect(() => {
       pausedRef.current = paused;
@@ -50,7 +55,21 @@ export const FroggerCanvas = forwardRef<GameControlsHandle, FroggerCanvasProps>(
       const ctx = canvas?.getContext("2d");
       if (!canvas || !ctx) return;
 
-      const engine = new FroggerEngine(ctx, WIDTH, HEIGHT);
+      // Frogger's board is 520x640 (taller than wide), not the shared 4:3 default
+      // baked into `.crt-screen`. Setting --crt-aspect on this specific `.crt-screen`
+      // instance (found via the DOM, since this component never renders inside
+      // game-player.tsx's own JSX) lets the shared CSS custom property resolve to the
+      // real ratio without a per-game branch in game-player.tsx. Cleaned up on unmount
+      // so the next game mounted into the same `.crt-screen` gets the 4:3 default back.
+      const screenEl = canvas.closest<HTMLElement>(".crt-screen");
+      screenEl?.style.setProperty("--crt-aspect", `${WIDTH} / ${HEIGHT}`);
+
+      const engine = new FroggerEngine(
+        ctx,
+        WIDTH,
+        HEIGHT,
+        initialSkinRef.current,
+      );
       engineRef.current = engine;
       wasGameOverRef.current = false;
 
@@ -78,7 +97,10 @@ export const FroggerCanvas = forwardRef<GameControlsHandle, FroggerCanvasProps>(
       };
       frameId = requestAnimationFrame(loop);
 
-      return () => cancelAnimationFrame(frameId);
+      return () => {
+        cancelAnimationFrame(frameId);
+        screenEl?.style.removeProperty("--crt-aspect");
+      };
       // Intentionally only re-runs on mount/unmount: paused/onSnapshot/onGameOver are read via refs
       // so the loop and its canvas/engine instance survive prop changes across renders.
     }, []);
@@ -88,6 +110,12 @@ export const FroggerCanvas = forwardRef<GameControlsHandle, FroggerCanvasProps>(
       wasGameOverRef.current = false;
       engineRef.current?.reset();
     }, [restartSignal]);
+
+    // Imperative, never a remount: the engine survives prop changes, so switching skins
+    // mid-run must not reset the game. Same shape as the restartSignal effect above.
+    useEffect(() => {
+      engineRef.current?.setSkin(skin);
+    }, [skin]);
 
     useImperativeHandle(ref, () => ({
       handleKeyDown: (code: string) => engineRef.current?.handleKeyDown(code),
