@@ -1,10 +1,15 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/components/auth-provider";
 import type { Game } from "@/app/data/games";
-import { GAME_ENGINES } from "@/components/games/registry";
+import {
+  GAME_ENGINES,
+  GAME_TOUCH_CONTROLS,
+  type GameControlsHandle,
+} from "@/components/games/registry";
+import { TouchControls } from "@/components/games/touch-controls";
 import {
   DEFAULT_SKIN,
   isSkinId,
@@ -27,6 +32,8 @@ export function GamePlayer({ game }: { game: Game }) {
   const [saved, setSaved] = useState(false);
   const [restartSignal, setRestartSignal] = useState(0);
   const [skin, setSkin] = useState<SkinId>(DEFAULT_SKIN);
+  const canvasRef = useRef<GameControlsHandle>(null);
+  const touchControls = GAME_TOUCH_CONTROLS[game.id];
 
   useEffect(() => {
     // Reads localStorage (unavailable during server render) after mount to avoid a
@@ -136,6 +143,7 @@ export function GamePlayer({ game }: { game: Game }) {
         <div className="crt-screen">
           {isReal ? (
             <Canvas
+              ref={canvasRef}
               paused={paused || over}
               onSnapshot={handleSnapshot}
               onGameOver={handleGameOver}
@@ -181,6 +189,10 @@ export function GamePlayer({ game }: { game: Game }) {
           <span>CARGA · 1MB</span>
         </div>
       </div>
+
+      {isReal && touchControls && (
+        <TouchControls controls={touchControls} targetRef={canvasRef} />
+      )}
 
       {over && (
         <div className="modal-bd">

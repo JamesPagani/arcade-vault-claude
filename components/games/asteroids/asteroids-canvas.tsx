@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { forwardRef, useEffect, useImperativeHandle, useRef } from "react";
 import {
   AsteroidsEngine,
   type AsteroidsSnapshot,
 } from "@/components/games/asteroids/engine";
 import { DEFAULT_SKIN, type SkinId } from "@/components/games/skins";
+import type { GameControlsHandle } from "@/components/games/registry";
 
 const WIDTH = 800;
 const HEIGHT = 600;
@@ -19,13 +20,13 @@ export interface AsteroidsCanvasProps {
   skin?: SkinId;
 }
 
-export function AsteroidsCanvas({
-  paused,
-  onSnapshot,
-  onGameOver,
-  restartSignal,
-  skin = DEFAULT_SKIN,
-}: AsteroidsCanvasProps) {
+export const AsteroidsCanvas = forwardRef<
+  GameControlsHandle,
+  AsteroidsCanvasProps
+>(function AsteroidsCanvas(
+  { paused, onSnapshot, onGameOver, restartSignal, skin = DEFAULT_SKIN },
+  ref,
+) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const engineRef = useRef<AsteroidsEngine | null>(null);
   const pausedRef = useRef(paused);
@@ -96,6 +97,11 @@ export function AsteroidsCanvas({
     engineRef.current?.setSkin(skin);
   }, [skin]);
 
+  useImperativeHandle(ref, () => ({
+    handleKeyDown: (code: string) => engineRef.current?.handleKeyDown(code),
+    handleKeyUp: (code: string) => engineRef.current?.handleKeyUp(code),
+  }));
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLCanvasElement>) => {
     if (GAME_KEYS.has(e.code)) e.preventDefault();
     engineRef.current?.handleKeyDown(e.code);
@@ -124,4 +130,4 @@ export function AsteroidsCanvas({
       }}
     />
   );
-}
+});

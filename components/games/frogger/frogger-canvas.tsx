@@ -2,14 +2,14 @@
 
 import { forwardRef, useEffect, useImperativeHandle, useRef } from "react";
 import {
-  SnakeEngine,
-  type SnakeSnapshot,
-} from "@/components/games/snake/engine";
+  FroggerEngine,
+  type FroggerSnapshot,
+} from "@/components/games/frogger/engine";
 import { DEFAULT_SKIN, type SkinId } from "@/components/games/skins";
 import type { GameControlsHandle } from "@/components/games/registry";
 
-const WIDTH = 800;
-const HEIGHT = 600;
+const WIDTH = 520;
+const HEIGHT = 640;
 const GAME_KEYS = new Set([
   "ArrowUp",
   "ArrowDown",
@@ -21,21 +21,21 @@ const GAME_KEYS = new Set([
   "KeyD",
 ]);
 
-export interface SnakeCanvasProps {
+export interface FroggerCanvasProps {
   paused: boolean;
-  onSnapshot: (snapshot: SnakeSnapshot) => void;
+  onSnapshot: (snapshot: FroggerSnapshot) => void;
   onGameOver: (finalScore: number) => void;
   restartSignal: number;
   skin?: SkinId;
 }
 
-export const SnakeCanvas = forwardRef<GameControlsHandle, SnakeCanvasProps>(
-  function SnakeCanvas(
+export const FroggerCanvas = forwardRef<GameControlsHandle, FroggerCanvasProps>(
+  function FroggerCanvas(
     { paused, onSnapshot, onGameOver, restartSignal, skin = DEFAULT_SKIN },
     ref,
   ) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
-    const engineRef = useRef<SnakeEngine | null>(null);
+    const engineRef = useRef<FroggerEngine | null>(null);
     const pausedRef = useRef(paused);
     const onSnapshotRef = useRef(onSnapshot);
     const onGameOverRef = useRef(onGameOver);
@@ -55,7 +55,16 @@ export const SnakeCanvas = forwardRef<GameControlsHandle, SnakeCanvasProps>(
       const ctx = canvas?.getContext("2d");
       if (!canvas || !ctx) return;
 
-      const engine = new SnakeEngine(
+      // Frogger's board is 520x640 (taller than wide), not the shared 4:3 default
+      // baked into `.crt-screen`. Setting --crt-aspect on this specific `.crt-screen`
+      // instance (found via the DOM, since this component never renders inside
+      // game-player.tsx's own JSX) lets the shared CSS custom property resolve to the
+      // real ratio without a per-game branch in game-player.tsx. Cleaned up on unmount
+      // so the next game mounted into the same `.crt-screen` gets the 4:3 default back.
+      const screenEl = canvas.closest<HTMLElement>(".crt-screen");
+      screenEl?.style.setProperty("--crt-aspect", `${WIDTH} / ${HEIGHT}`);
+
+      const engine = new FroggerEngine(
         ctx,
         WIDTH,
         HEIGHT,
@@ -88,7 +97,10 @@ export const SnakeCanvas = forwardRef<GameControlsHandle, SnakeCanvasProps>(
       };
       frameId = requestAnimationFrame(loop);
 
-      return () => cancelAnimationFrame(frameId);
+      return () => {
+        cancelAnimationFrame(frameId);
+        screenEl?.style.removeProperty("--crt-aspect");
+      };
       // Intentionally only re-runs on mount/unmount: paused/onSnapshot/onGameOver are read via refs
       // so the loop and its canvas/engine instance survive prop changes across renders.
     }, []);
