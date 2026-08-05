@@ -12,13 +12,7 @@ Arcade Vault ("arcade-vault") — a Next.js 16 platform for playing retro arcade
 
 ## Commands
 
-```bash
-npm run dev           # next dev
-npm run build         # next build — the acceptance gate for every spec
-npm run lint          # eslint
-npm run format        # prettier --write .
-npm run format:check  # prettier --check .
-```
+Standard `npm run` scripts (see `package.json`). `npm run build` doubles as the acceptance gate for every spec.
 
 ## Spec Driven Design
 
