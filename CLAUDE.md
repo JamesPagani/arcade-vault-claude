@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-Arcade Vault ("arcade-vault") — a Next.js 16 platform for playing retro arcade games in the browser and competing on a shared leaderboard. Four games are actually playable (Asteroids, Tetris, Arkanoid, Snake); the rest of the catalog is still placeholder metadata backed by a mock scoring simulation in `GamePlayer`.
+Arcade Vault ("arcade-vault") — a Next.js 16 platform for playing retro arcade games in the browser and competing on a shared leaderboard. Five games are actually playable (Asteroids, Tetris, Arkanoid, Snake, Frogger). The Supabase `games` table holds only those five rows, so `/juegos`, `/juegos/[id]` and `/salon-de-la-fama` show nothing else. The old placeholder catalog survives only in the static `GAMES` array in `app/data/games.ts`, which still feeds the landing-page preview rail (`app/page.tsx`, `GAMES.slice(0, 6)`) — those placeholder cards 404 if followed, since every game route resolves through Supabase. `GamePlayer`'s mock scoring simulation is consequently unreachable today; it's kept as the documented fallback for a `game.id` with no `GAME_ENGINES` entry.
 
 **All user-facing copy is in Spanish**, including route segments (`/juegos`, `/salon-de-la-fama`, `/iniciar-sesion`, `/acerca-de`). Match that language when adding UI, and reply in the language the user writes in.
 
@@ -22,23 +22,34 @@ npm run format:check  # prettier --check .
 
 ## Spec Driven Design
 
-This project follows Spec Driven Design. Specs live in `specs/NN-<slug>.md`, numbered sequentially, each with a `**Status:**` field (`Draft` → `Approved` → `Implemented`). **Read the relevant spec before implementing anything**; specs 01–09 are all implemented and are the authoritative record of why the code looks the way it does.
+This project follows Spec Driven Design. Specs live in `specs/NN-<slug>.md`, numbered sequentially, each with a `**Status:**` field (`Draft` → `Approved` → `Implemented`). **Read the relevant spec before implementing anything**; specs 01–10 are all implemented (08's status literal reads `Integrated`) and are the authoritative record of why the code looks the way it does. Game-jam specs live at `specs/game-jam/<game-id>/NN-<slug>.md`: `frogger/01` is Implemented; both `duelo-de-ranas` specs are still `Draft`.
 
 Skills that drive the workflow:
 
 - **`/spec`** — authors a general feature spec (from `.agents/skills/spec/`, installed via `npx skills@latest add Klerith/fernando-skills`).
 - **`/spec-impl`** — executes an approved spec step by step, one commit per step. Branch creation is controlled by `AutoCreateBranch` in `specs/.spec-config.yml` (currently `true`).
+- **`/spec-impl-game`** — `/spec-impl` plus two automatic follow-on steps once the build is green: `skin-designer <slug>` then `mobile-porter <slug>`, run **strictly in series, never in the same message** (both write `components/game-player.tsx` and blocks of `app/globals.css`, so parallel runs would conflict).
 - **`/add-game`** — project-local skill (`.claude/skills/add-game/`) that authors a game-integration spec. It never writes code, CSS, or SQL. Its `reference.md` is the **platform contract** for game integration (engine contract, canvas contract, registration rule, data layer, schema, cover-art pattern, per-template hazards) — read it before touching anything under `components/games/`.
 - **`/frontend-design`** — always use this when designing or reshaping UI.
 
 ### Agents
 
-- **`game-planner`** (`.claude/agents/game-planner.md`) — decides _which_ game the platform builds next. It scores candidates against the platform contract (portability, leaderboard fit, catalog balance, CSS-only cover art, asset burden, effort), maintains the Spanish to-do list at `references/game-suggestions-todo.md`, and keeps its own memory in `.claude/game-planner/` (`decisions.md` append-only log, `rejected.md` ledger, `README.md` protocol). It writes nowhere else and never produces specs or code.
-- **`game-jam`** (`.claude/agents/game-jam.md`) — given a loose topic (e.g. "a game about coffee"), invents an original game from scratch and authors at least two full, independently implementable specs for it under `specs/game-jam/<game-id>/` (a core integration spec plus follow-ups), reusing the same platform contract. Runs autonomously, no interview. Writes only under `specs/game-jam/`; never code, CSS, SQL, or migrations.
-- **`skin-designer`** (`.claude/agents/skin-designer.md`) — invoked as `skin-designer <slug>`, gives **one already-implemented** game three canvas skins: `classic` (a byte-exact transcription of its current look, and the default), `neon`, and `retro`. It lifts the engine's hardcoded draw literals into `components/games/<slug>/skins.ts`, adds `setSkin()` to the engine, and on its first run builds the platform seam (`components/games/skins.ts`, a `skin` prop on `GameCanvasProps`, and an `av_skin`-backed picker in `GamePlayer`'s `.hud-actions`). Unlike the other two agents it **does write code**, but only under `components/games/**` and `components/game-player.tsx`; it keeps its contract and an append-only palette ledger in `.claude/skin-designer/`. Scope is canvas visuals only — never site chrome, `:root`, `.cover-*`, gameplay, or Supabase. A slug with no `GAME_ENGINES` entry is refused outright with nothing written.
-- **`mobile-porter`** (`.claude/agents/mobile-porter.md`) — invoked as `mobile-porter <slug>`, makes **one already-implemented** game's play screen fit both desktop and mobile: HUD wrapping, `.crt`/`.crt-screen` sizing (via a `--crt-aspect` custom property so a non-4:3 canvas like Tetris's doesn't need a per-game branch), and `clamp()`-scaled touch-control sizing with a safe-area inset. It also writes code, but only in play-screen blocks of `app/globals.css`, `components/game-player.tsx`, and the target game's `<slug>-canvas.tsx` wrapper — never canvas `width`/`height` attributes, `engine.ts`, or `skins.ts`, which stay `skin-designer`'s territory (color is not layout). It keeps its contract and an append-only viewport ledger in `.claude/mobile-porter/`. Scope is the play screen only — never site chrome, `:root`, `.av-nav`, `.cover-*`, gameplay, or Supabase. A slug with no `GAME_ENGINES` entry is refused outright with nothing written.
+Four agents extend the workflow beyond specs. Each keeps its own append-only memory/ledger under
+`.claude/<agent-name>/`; read `.claude/agents/<name>.md` for the full contract (scope limits, refusal rules,
+exact write paths) before invoking one.
 
-Four hand-off chains: **`game-planner` → `/add-game <slug>` → `/spec-impl`** for picking a known game from the backlog, **`game-jam <topic>` → `/spec-impl specs/game-jam/<slug>/01-...`** for inventing an original one from a theme, and **`skin-designer <slug>`** and **`mobile-porter <slug>`**, each standing alone, run once per game after that game is already playable — one dresses the canvas, the other fits the screen around it.
+| Agent           | What it does                                                                                                                                                                                                     |
+| --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `game-planner`  | Decides which known game the platform builds next; ranks candidates and owns `references/game-suggestions-todo.md`. Writes no specs or code.                                                                     |
+| `game-jam`      | Turns a loose topic into an original game plus ≥2 implementable specs under `specs/game-jam/<game-id>/`. Writes only specs, never code/CSS/SQL.                                                                  |
+| `skin-designer` | Gives one already-playable game its three canvas skins (`classic`/`neon`/`retro`). Writes only `components/games/**` and `game-player.tsx`. Refuses a slug absent from `GAME_ENGINES`.                           |
+| `mobile-porter` | Fits one already-playable game's play screen to mobile (HUD wrap, `--crt-aspect`, touch sizing). Writes only play-screen CSS, `game-player.tsx`, `<slug>-canvas.tsx`. Refuses a slug absent from `GAME_ENGINES`. |
+
+Current coverage: `skin-designer` has run for asteroids, arkanoid, snake and frogger — **tetris still has no
+`skins.ts` and ignores the `skin` prop**. `mobile-porter` has run for frogger only, but the `--crt-aspect`
+seam that run built onto `.crt-screen` is shared platform plumbing every game's canvas can use.
+
+Four hand-off chains: **`game-planner` → `/add-game <slug>` → `/spec-impl`** for picking a known game from the backlog, **`game-jam <topic>` → `/spec-impl specs/game-jam/<slug>/01-...`** for inventing an original one from a theme, **`/spec-impl-game <spec>`** to run a spec plus reskin plus mobile port in one pass, and **`skin-designer <slug>`** / **`mobile-porter <slug>`** standing alone, run once per game after that game is already playable.
 
 ## Architecture
 
@@ -62,7 +73,7 @@ Four hand-off chains: **`game-planner` → `/add-game <slug>` → `/spec-impl`**
 - **Supabase** (`@supabase/ssr`) is the source of truth for games and scores. `lib/supabase/server.ts` (cookie-aware, `await cookies()`) for server components; `lib/supabase/client.ts` for the browser.
 - `lib/games.ts` — `listGames()`, `getGame(id)`. `lib/scores.ts` — `listScores(gameId)` (server read). `lib/scores-client.ts` — `insertScore(gameId, name, score)` (browser write). These are already generic; adding a game requires **no changes here**.
 - Tables: `games` (text `id` slug PK, title/short/long/cat/cover/color/best/plays) and `scores` (uuid PK, `game_id` FK, name, score, created_at). Both have RLS with public select; `scores` also allows public insert. Schema is documented in `specs/06-games-and-scores-supabase.md`.
-- `app/data/games.ts` still exports the `Game`/`GameCategory` types and the legacy `GAMES` array plus `CATS`. **The type is what's live** — the array is now historical/seed reference, since routes read from Supabase.
+- `app/data/games.ts` still exports the `Game`/`GameCategory` types and the legacy `GAMES` array plus `CATS`. **The type is what's live**, and `CATS` still drives the `/juegos` category-filter chips; `GAMES` itself is live only for the landing-page preview rail (`app/page.tsx`) — otherwise it's historical/seed reference, since every game route reads from Supabase.
 - `app/data/players.ts` provides fake seeded leaderboard names for placeholder games.
 - Auth (`components/auth-provider.tsx`) is a mock localStorage-backed context, read after mount to avoid hydration mismatch. There is no real Supabase Auth.
 
@@ -71,16 +82,18 @@ Four hand-off chains: **`game-planner` → `/add-game <slug>` → `/spec-impl`**
 Each game is `components/games/<slug>/engine.ts` + `<slug>-canvas.tsx`:
 
 - **Engine** — framework-free class (no React, no DOM beyond `CanvasRenderingContext2D`, no persistence): `update(dt)`, `draw()`, `handleKeyDown/Up(code)`, `reset()`, `getSnapshot()`. Vanilla-template module globals become instance fields.
-- **Canvas component** — props `{ paused, onSnapshot, onGameOver, restartSignal }` (see `GameCanvasProps` in `components/games/registry.ts`).
-- **Registration is two places**: a row in the Supabase `games` table and an entry in `GAME_ENGINES` in `components/games/registry.ts`. `GamePlayer` dispatches purely off that registry — never add a hardcoded per-game branch. A `game.id` with no registry entry falls through to the mock score simulation.
-- Binary assets live under `public/games/<slug>/` (Arkanoid spritesheet + sounds, Snake fruit sprites).
-- Cover art is a `.cover-<slug>` CSS block in `app/globals.css` (pure CSS gradients/pseudo-elements, no images).
+- **Canvas component** — `forwardRef` + `useImperativeHandle` exposing `GameControlsHandle` (`handleKeyDown`/`handleKeyUp`), so `TouchControls` can drive any game without a per-game branch. Props `{ paused, onSnapshot, onGameOver, restartSignal, skin? }` (see `GameCanvasProps` in `components/games/registry.ts`) — `skin` is optional so a game without a palette yet (tetris) simply ignores it.
+- **Registration is three places**: a row in the Supabase `games` table, an entry in `GAME_ENGINES`, and an entry in `GAME_TOUCH_CONTROLS` (per-slot `code`/`hold`|`tap`/`enabled`) — all in `components/games/registry.ts`. `GamePlayer` dispatches purely off these registries — never add a hardcoded per-game branch. A `game.id` with no `GAME_ENGINES` entry falls through to the mock score simulation.
+- **Skins** — a per-game `components/games/<slug>/skins.ts` palette plus `setSkin()` on the engine; the platform seam (`components/games/skins.ts` — `SkinId`, `SKIN_IDS`, `DEFAULT_SKIN`, `SKINS`, `isSkinId`) backs a three-way picker in `GamePlayer`'s `.hud-actions`, persisted as `localStorage["av_skin"]` and read after mount. See `skin-designer` in Agents above for which games have one.
+- **Non-4:3 canvases** set the `--crt-aspect` CSS custom property on their ancestor `.crt-screen` imperatively from the canvas wrapper's mount effect (e.g. `frogger-canvas.tsx` → `520 / 640`) — custom properties only cascade downward, and `.crt-screen` is rendered by the game-agnostic `game-player.tsx` as an ancestor of whatever `GAME_ENGINES` renders.
+- Binary assets live under `public/games/<slug>/` — only Arkanoid (spritesheet + 2 sounds) and Snake (fruit sprites) have any.
+- Cover art is a `.cover-<slug>` CSS block in `app/globals.css` (pure CSS gradients/pseudo-elements, no images) — or reuse of an existing one when the visual already fits (Frogger reuses `.cover-rana`, no new CSS).
 
 All currently implemented games can be found at `references/implemented-games.md`.
 
 ### Styling
 
-Tailwind CSS v4 via `@tailwindcss/postcss` — configured through CSS, there is no `tailwind.config.*`. `app/globals.css` (~1300 lines) holds the neon-arcade design system and all cover-art blocks. `components/use-reveal.ts` drives scroll-reveal animations.
+Tailwind CSS v4 via `@tailwindcss/postcss` — configured through CSS, there is no `tailwind.config.*`. `app/globals.css` (~1460 lines) holds the neon-arcade design system, all cover-art blocks, and the skin/touch-control/`.crt` play-screen rules. `components/use-reveal.ts` drives scroll-reveal animations.
 
 ### Tooling
 
