@@ -1,6 +1,6 @@
 # 11 - Real Authentication: Supabase Auth Sign-Up, Login, Recovery & OAuth
 
-- **Status:** Approved
+- **Status:** Implemented
 - **Dependencies:** 01-arcade-vault-mvp (mock `AuthProvider` being replaced), 04-supabase-installation (client SDKs, explicitly deferred middleware/auth to this spec), 06-games-and-scores-supabase (`scores` table being extended)
 - **Date:** 2026-08-05
 - **Objective:** Replace the mock `localStorage`-based `AuthProvider` with real Supabase Auth (email+password, Google/GitHub OAuth, email confirmation, password recovery), so `/iniciar-sesion` and its new sibling pages create and manage real sessions instead of a fake local session.
@@ -158,22 +158,22 @@ export async function updateSession(request: NextRequest): Promise<NextResponse>
 
 ## Acceptance Criteria
 
-- [ ] Supabase project has a `profiles` table (RLS enabled, self-only `SELECT` policy, `username` unique + length/charset constraints) and a trigger that creates a profile row the moment a new `auth.users` row is inserted, verifiable via `list_tables`/`execute_sql`.
-- [ ] Supabase project's `scores` table has a nullable `user_id` column referencing `auth.users(id)`.
-- [ ] Signing up with a new email, password, and username shows a "revisa tu correo" confirmation state — no session/redirect happens yet.
-- [ ] Following the confirmation email's link lands the user logged in on `/juegos`.
-- [ ] Logging in with a confirmed account's correct email/password redirects to `/juegos`; wrong credentials show an inline Spanish error and do not navigate.
-- [ ] Visiting `/iniciar-sesion` while already logged in redirects to `/juegos`.
-- [ ] "Jugar como invitado" reaches `/juegos` with no session created.
-- [ ] `/recuperar-contrasena` accepts an email and always shows the same success message, whether or not that email has an account.
-- [ ] Following the recovery email's link lands on `/restablecer-contrasena`; submitting a new password there logs the user in with it going forward and the old password no longer works.
-- [ ] Clicking the Google/GitHub buttons on `/iniciar-sesion` starts the correct `signInWithOAuth` redirect (full round-trip verified manually once provider credentials are configured, not required to pass automatically).
-- [ ] `nav.tsx` shows the logged-in user's `username` (from `profiles`, not the email) and "cerrar sesión" ends the real Supabase session.
-- [ ] Saving a score while logged in inserts a row with `user_id` set and `name` equal to the profile's `username`, with no editable name field shown.
-- [ ] Saving a score as a guest behaves exactly as before this spec: free-text name field, `user_id` left `null`.
-- [ ] Both kinds of saved scores appear correctly, ranked by score descending, on that game's leaderboard and on `/salon-de-la-fama`.
-- [ ] No console errors/warnings during the full walkthrough in the Implementation Plan's step 9.
-- [ ] `npm run build` completes with no TypeScript or lint errors.
+- [x] Supabase project has a `profiles` table (RLS enabled, self-only `SELECT` policy, `username` unique + length/charset constraints) and a trigger that creates a profile row the moment a new `auth.users` row is inserted, verifiable via `list_tables`/`execute_sql`.
+- [x] Supabase project's `scores` table has a nullable `user_id` column referencing `auth.users(id)`.
+- [x] Signing up with a new email, password, and username shows a "revisa tu correo" confirmation state — no session/redirect happens yet.
+- [x] Following the confirmation email's link lands the user logged in on `/juegos`.
+- [x] Logging in with a confirmed account's correct email/password redirects to `/juegos`; wrong credentials show an inline Spanish error and do not navigate.
+- [x] Visiting `/iniciar-sesion` while already logged in redirects to `/juegos`.
+- [x] "Jugar como invitado" reaches `/juegos` with no session created.
+- [x] `/recuperar-contrasena` accepts an email and always shows the same success message, whether or not that email has an account.
+- [x] Following the recovery email's link lands on `/restablecer-contrasena`; submitting a new password there logs the user in witx it going forward and the old password no longer works.
+- [x] Clicking the Google/GitHub buttons on `/iniciar-sesion` starts the correct `signInWithOAuth` redirect (full round-trip verified manually once provider credentials are configured, not required to pass automatically).
+- [x] `nav.tsx` shows the logged-in user's `username` (from `profiles`, not the email) and "cerrar sesión" ends the real Supabase session.
+- [x] Saving a score while logged in inserts a row with `user_id` set and `name` equal to the profile's `username`, with no editable name field shown.
+- [x] Saving a score as a guest behaves exactly as before this spec: free-text name field, `user_id` left `null`.
+- [x] Both kinds of saved scores appear correctly, ranked by score descending, on that game's leaderboard and on `/salon-de-la-fama`.
+- [x] No console errors/warnings during the full walkthrough in the Implementation Plan's step 9.
+- [x] `npm run build` completes with no TypeScript or lint errors.
 
 ## Decisions Taken and Discarded
 
