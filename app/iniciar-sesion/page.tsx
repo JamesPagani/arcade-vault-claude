@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/auth-provider";
 import { createClient } from "@/lib/supabase/client";
@@ -185,6 +186,23 @@ export default function AuthPage() {
             {tab === "in" ? "ENTRAR AL VAULT" : "CREAR Y JUGAR"}
           </button>
         </form>
+
+        {tab === "in" && (
+          <Link
+            href="/recuperar-contrasena"
+            className="mono"
+            style={{
+              display: "block",
+              textAlign: "center",
+              marginTop: 10,
+              fontSize: 11,
+              color: "var(--ink-faint)",
+              letterSpacing: "0.06em",
+            }}
+          >
+            ¿OLVIDASTE TU CONTRASEÑA?
+          </Link>
+        )}
 
         <button className="btn ghost" style={{ width: "100%", marginTop: 10 }} onClick={guest}>
           JUGAR COMO INVITADO
