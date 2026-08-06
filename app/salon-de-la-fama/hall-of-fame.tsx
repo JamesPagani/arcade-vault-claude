@@ -19,7 +19,7 @@ export default function HallOfFame({
   const game = games.find((g) => g.id === tab)!;
 
   const yourBest = useMemo(
-    () => (user ? (rows.find((r) => r.name === user.name) ?? null) : null),
+    () => (user ? (rows.find((r) => r.name === user.username) ?? null) : null),
     [user, rows],
   );
   const yourRank = yourBest ? rows.indexOf(yourBest) + 1 : null;
