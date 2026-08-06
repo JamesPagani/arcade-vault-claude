@@ -1,6 +1,6 @@
 # 12 - Security Hardening: Response Headers, Supabase Function/RLS Fixes, Login-Gated Score Saving
 
-- **Status:** Approved
+- **Status:** Implemented
 - **Dependencies:** 06-games-and-scores-supabase (`scores` table and its RLS policies), 11-supabase-authentication (`auth-provider.tsx`, `profiles`, `handle_new_user` trigger, the save-score modal, the password forms)
 - **Date:** 2026-08-06
 - **Objective:** Close the security gaps listed in `references/security/security-checklist.md` — Next.js response headers, two Supabase function/RLS warnings, and the fully-open `scores` INSERT policy (closed by requiring a session to save a score) — while documenting the three Supabase Auth dashboard settings that have no code or migration path.
@@ -92,18 +92,18 @@ const securityHeaders = [
 
 ## Acceptance Criteria
 
-- [ ] `next.config.ts` returns `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, and `Referrer-Policy: strict-origin-when-cross-origin` on every route.
-- [ ] `handle_new_user()` has a pinned `search_path` and `EXECUTE` revoked from `public`/`anon`/`authenticated`; a fresh sign-up still creates a `profiles` row.
-- [ ] `rls_auto_enable()` has `EXECUTE` revoked from `public`/`anon`/`authenticated`.
-- [ ] `mcp__supabase__get_advisors(type:"security")` no longer reports `function_search_path_mutable`, `anon_security_definer_function_executable`, or `authenticated_security_definer_function_executable`.
-- [ ] The `scores` table's INSERT policy only allows the `authenticated` role with `auth.uid() = user_id`; an anonymous insert attempt is rejected by RLS.
-- [ ] A logged-out user finishing a game sees a message with a link to `/iniciar-sesion` instead of a name input and save button.
-- [ ] A logged-in user finishing a game saves a score exactly as before this spec (name locked to the profile's username, `user_id` populated).
-- [ ] Pre-existing scores with `user_id = null` still appear on that game's leaderboard and on `/salon-de-la-fama`.
-- [ ] Signing up with a password under 8 characters shows an inline Spanish error and never calls `supabase.auth.signUp`.
-- [ ] Submitting a new password under 8 characters on `/restablecer-contrasena` shows an inline Spanish error and never calls `supabase.auth.updateUser`.
-- [ ] No console errors during the full manual walkthrough in step 7.
-- [ ] `npm run build` completes with no TypeScript or lint errors.
+- [x] `next.config.ts` returns `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, and `Referrer-Policy: strict-origin-when-cross-origin` on every route.
+- [x] `handle_new_user()` has a pinned `search_path` and `EXECUTE` revoked from `public`/`anon`/`authenticated`; a fresh sign-up still creates a `profiles` row.
+- [x] `rls_auto_enable()` has `EXECUTE` revoked from `public`/`anon`/`authenticated`.
+- [x] `mcp__supabase__get_advisors(type:"security")` no longer reports `function_search_path_mutable`, `anon_security_definer_function_executable`, or `authenticated_security_definer_function_executable`.
+- [x] The `scores` table's INSERT policy only allows the `authenticated` role with `auth.uid() = user_id`; an anonymous insert attempt is rejected by RLS.
+- [x] A logged-out user finishing a game sees a message with a link to `/iniciar-sesion` instead of a name input and save button.
+- [x] A logged-in user finishing a game saves a score exactly as before this spec (name locked to the profile's username, `user_id` populated).
+- [x] Pre-existing scores with `user_id = null` still appear on that game's leaderboard and on `/salon-de-la-fama`.
+- [x] Signing up with a password under 8 characters shows an inline Spanish error and never calls `supabase.auth.signUp`.
+- [x] Submitting a new password under 8 characters on `/restablecer-contrasena` shows an inline Spanish error and never calls `supabase.auth.updateUser`.
+- [x] No console errors during the full manual walkthrough in step 7.
+- [x] `npm run build` completes with no TypeScript or lint errors.
 
 ## Decisions Taken and Discarded
 
