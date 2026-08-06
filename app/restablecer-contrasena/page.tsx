@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { validatePassword } from "@/components/auth-validation";
 import { createClient } from "@/lib/supabase/client";
 
 export default function ResetPasswordPage() {
@@ -13,6 +14,12 @@ export default function ResetPasswordPage() {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+
+    if (!validatePassword(pass)) {
+      setError("La contraseña debe tener al menos 8 caracteres.");
+      return;
+    }
+
     setSubmitting(true);
 
     const supabase = createClient();
