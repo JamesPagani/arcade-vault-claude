@@ -28,7 +28,7 @@ export function GamePlayer({ game }: { game: Game }) {
   const [level, setLevel] = useState(1);
   const [paused, setPaused] = useState(false);
   const [over, setOver] = useState(false);
-  const [name, setName] = useState(user ? user.username : "INVITADO");
+  const name = user ? user.username : "INVITADO";
   const [saved, setSaved] = useState(false);
   const [restartSignal, setRestartSignal] = useState(0);
   const [skin, setSkin] = useState<SkinId>(DEFAULT_SKIN);
@@ -201,30 +201,31 @@ export function GamePlayer({ game }: { game: Game }) {
             <div className="final-label">PUNTUACIÓN FINAL</div>
             <div className="final">{score.toLocaleString("es-ES")}</div>
             {!saved ? (
-              <div className="input-row">
-                {!user && (
-                  <input
-                    value={name}
-                    onChange={(e) =>
-                      setName(e.target.value.toUpperCase().slice(0, 10))
-                    }
-                    placeholder="TUS INICIALES"
-                  />
-                )}
-                <button
-                  className="btn yellow"
-                  onClick={async () => {
-                    if (user) {
+              user ? (
+                <div className="input-row">
+                  <button
+                    className="btn yellow"
+                    onClick={async () => {
                       await insertScore(game.id, user.username, score, user.id);
-                    } else {
-                      await insertScore(game.id, name, score);
-                    }
-                    setSaved(true);
-                  }}
+                      setSaved(true);
+                    }}
+                  >
+                    GUARDAR PUNTUACIÓN
+                  </button>
+                </div>
+              ) : (
+                <div
+                  className="input-row"
+                  style={{ flexDirection: "column", alignItems: "center" }}
                 >
-                  GUARDAR PUNTUACIÓN
-                </button>
-              </div>
+                  <p className="mono" style={{ fontSize: 12, color: "var(--ink-faint)" }}>
+                    INICIA SESIÓN PARA GUARDAR TU PUNTUACIÓN
+                  </p>
+                  <Link href="/iniciar-sesion" className="btn yellow">
+                    INICIAR SESIÓN
+                  </Link>
+                </div>
+              )
             ) : (
               <div className="toast-saved">▸ PUNTUACIÓN GUARDADA_</div>
             )}
