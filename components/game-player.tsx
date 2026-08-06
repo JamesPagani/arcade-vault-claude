@@ -22,13 +22,13 @@ import { insertScore } from "@/lib/scores-client";
 export function GamePlayer({ game }: { game: Game }) {
   const Canvas = GAME_ENGINES[game.id];
   const isReal = Boolean(Canvas);
-  const { user, saveScore } = useAuth();
+  const { user } = useAuth();
   const [score, setScore] = useState(0);
   const [lives, setLives] = useState(3);
   const [level, setLevel] = useState(1);
   const [paused, setPaused] = useState(false);
   const [over, setOver] = useState(false);
-  const [name, setName] = useState(user ? user.name : "INVITADO");
+  const [name, setName] = useState(user ? user.username : "INVITADO");
   const [saved, setSaved] = useState(false);
   const [restartSignal, setRestartSignal] = useState(0);
   const [skin, setSkin] = useState<SkinId>(DEFAULT_SKIN);
@@ -202,20 +202,22 @@ export function GamePlayer({ game }: { game: Game }) {
             <div className="final">{score.toLocaleString("es-ES")}</div>
             {!saved ? (
               <div className="input-row">
-                <input
-                  value={name}
-                  onChange={(e) =>
-                    setName(e.target.value.toUpperCase().slice(0, 10))
-                  }
-                  placeholder="TUS INICIALES"
-                />
+                {!user && (
+                  <input
+                    value={name}
+                    onChange={(e) =>
+                      setName(e.target.value.toUpperCase().slice(0, 10))
+                    }
+                    placeholder="TUS INICIALES"
+                  />
+                )}
                 <button
                   className="btn yellow"
                   onClick={async () => {
-                    if (isReal) {
-                      await insertScore(game.id, name, score);
+                    if (user) {
+                      await insertScore(game.id, user.username, score, user.id);
                     } else {
-                      saveScore({ game: game.id, score, name });
+                      await insertScore(game.id, name, score);
                     }
                     setSaved(true);
                   }}
