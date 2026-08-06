@@ -28,22 +28,23 @@ Skills that drive the workflow:
 
 ### Agents
 
-Four agents extend the workflow beyond specs. Each keeps its own append-only memory/ledger under
+Five agents extend the workflow beyond specs. Each keeps its own append-only memory/ledger under
 `.claude/<agent-name>/`; read `.claude/agents/<name>.md` for the full contract (scope limits, refusal rules,
 exact write paths) before invoking one.
 
-| Agent           | What it does                                                                                                                                                                                                     |
-| --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `game-planner`  | Decides which known game the platform builds next; ranks candidates and owns `references/game-suggestions-todo.md`. Writes no specs or code.                                                                     |
-| `game-jam`      | Turns a loose topic into an original game plus ≥2 implementable specs under `specs/game-jam/<game-id>/`. Writes only specs, never code/CSS/SQL.                                                                  |
-| `skin-designer` | Gives one already-playable game its three canvas skins (`classic`/`neon`/`retro`). Writes only `components/games/**` and `game-player.tsx`. Refuses a slug absent from `GAME_ENGINES`.                           |
-| `mobile-porter` | Fits one already-playable game's play screen to mobile (HUD wrap, `--crt-aspect`, touch sizing). Writes only play-screen CSS, `game-player.tsx`, `<slug>-canvas.tsx`. Refuses a slug absent from `GAME_ENGINES`. |
+| Agent              | What it does                                                                                                                                                                                                     |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `game-planner`      | Decides which known game the platform builds next; ranks candidates and owns `references/game-suggestions-todo.md`. Writes no specs or code.                                                                     |
+| `game-jam`          | Turns a loose topic into an original game plus ≥2 implementable specs under `specs/game-jam/<game-id>/`. Writes only specs, never code/CSS/SQL.                                                                  |
+| `skin-designer`     | Gives one already-playable game its three canvas skins (`classic`/`neon`/`retro`). Writes only `components/games/**` and `game-player.tsx`. Refuses a slug absent from `GAME_ENGINES`.                           |
+| `mobile-porter`     | Fits one already-playable game's play screen to mobile (HUD wrap, `--crt-aspect`, touch sizing). Writes only play-screen CSS, `game-player.tsx`, `<slug>-canvas.tsx`. Refuses a slug absent from `GAME_ENGINES`. |
+| `security-auditor`  | Sweeps source and the live Supabase database for security gaps; owns `references/security/security-checklist.md`. Read-only against the database, never fixes anything itself.                                  |
 
 Current coverage: `skin-designer` has run for asteroids, arkanoid, snake and frogger — **tetris still has no
 `skins.ts` and ignores the `skin` prop**. `mobile-porter` has run for frogger only, but the `--crt-aspect`
 seam that run built onto `.crt-screen` is shared platform plumbing every game's canvas can use.
 
-Four hand-off chains: **`game-planner` → `/add-game <slug>` → `/spec-impl`** for picking a known game from the backlog, **`game-jam <topic>` → `/spec-impl specs/game-jam/<slug>/01-...`** for inventing an original one from a theme, **`/spec-impl-game <spec>`** to run a spec plus reskin plus mobile port in one pass, and **`skin-designer <slug>`** / **`mobile-porter <slug>`** standing alone, run once per game after that game is already playable.
+Five hand-off chains: **`game-planner` → `/add-game <slug>` → `/spec-impl`** for picking a known game from the backlog, **`game-jam <topic>` → `/spec-impl specs/game-jam/<slug>/01-...`** for inventing an original one from a theme, **`/spec-impl-game <spec>`** to run a spec plus reskin plus mobile port in one pass, **`skin-designer <slug>`** / **`mobile-porter <slug>`** standing alone, run once per game after that game is already playable, and **`security-auditor` → `/spec` → `/spec-impl`** for turning an audit finding into a hardening spec — spec 12 is the worked precedent.
 
 ## Architecture
 
