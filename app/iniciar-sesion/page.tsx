@@ -83,6 +83,17 @@ export default function AuthPage() {
     router.push("/juegos");
   };
 
+  // OAuth requires the provider's Client ID/Secret and authorized redirect
+  // URI to be configured in the Supabase dashboard first — see spec
+  // specs/11-supabase-authentication.md, "OAuth login via Google and GitHub".
+  const oauthLogin = async (provider: "google" | "github") => {
+    const supabase = createClient();
+    await supabase.auth.signInWithOAuth({
+      provider,
+      options: { redirectTo: `${window.location.origin}/auth/callback?next=/juegos` },
+    });
+  };
+
   if (signupSent) {
     return (
       <div className="av-auth-wrap fade-in">
@@ -210,8 +221,12 @@ export default function AuthPage() {
 
         <div className="auth-divider">O CONTINÚA CON</div>
         <div className="social">
-          <button className="btn ghost" type="button">◆  GOOGLE</button>
-          <button className="btn ghost" type="button">▣  GITHUB</button>
+          <button className="btn ghost" type="button" onClick={() => oauthLogin("google")}>
+            ◆  GOOGLE
+          </button>
+          <button className="btn ghost" type="button" onClick={() => oauthLogin("github")}>
+            ▣  GITHUB
+          </button>
         </div>
 
         <div style={{ marginTop: 18, textAlign: "center", fontSize: 11, color: "var(--ink-faint)", letterSpacing: "0.1em" }}>
