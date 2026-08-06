@@ -5,6 +5,7 @@ export interface ScoreRow {
   game_id: string;
   name: string;
   score: number;
+  user_id: string | null;
   created_at: string;
 }
 

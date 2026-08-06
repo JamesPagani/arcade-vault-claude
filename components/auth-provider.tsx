@@ -1,67 +1,74 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  type ReactNode,
+} from "react";
+import type { Session } from "@supabase/supabase-js";
+import { createClient } from "@/lib/supabase/client";
+import { getProfile } from "@/lib/profiles";
 
 export interface AuthUser {
-  name: string;
-}
-
-export interface ScoreEntry {
-  game: string;
-  score: number;
-  name: string;
-  at: number;
+  id: string;
+  email: string;
+  username: string;
 }
 
 interface AuthContextValue {
   user: AuthUser | null;
-  login: (user: AuthUser | null) => void;
-  signOut: () => void;
-  saveScore: (entry: Omit<ScoreEntry, "at">) => void;
+  loading: boolean;
+  signOut: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
+async function resolveUser(session: Session | null): Promise<AuthUser | null> {
+  if (!session?.user?.email) return null;
+
+  const profile = await getProfile(session.user.id);
+  if (!profile) return null;
+
+  return {
+    id: session.user.id,
+    email: session.user.email,
+    username: profile.username,
+  };
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Reads localStorage (unavailable during server render) after mount to avoid a
-    // hydration mismatch; the state is always null on first paint by design.
-    try {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setUser(JSON.parse(localStorage.getItem("av_user") || "null"));
-    } catch {
-      setUser(null);
-    }
+    const supabase = createClient();
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      resolveUser(session).then((resolved) => {
+        setUser(resolved);
+        setLoading(false);
+      });
+    });
+
+    const { data: listener } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        resolveUser(session).then(setUser);
+      },
+    );
+
+    return () => listener.subscription.unsubscribe();
   }, []);
 
-  const login = (user: AuthUser | null) => {
-    setUser(user);
-    if (user) {
-      localStorage.setItem("av_user", JSON.stringify(user));
-    } else {
-      localStorage.removeItem("av_user");
-    }
-  };
-
-  const signOut = () => {
+  const signOut = async () => {
+    const supabase = createClient();
+    await supabase.auth.signOut();
     setUser(null);
-    localStorage.removeItem("av_user");
-  };
-
-  const saveScore = (entry: Omit<ScoreEntry, "at">) => {
-    try {
-      const all = JSON.parse(localStorage.getItem("av_scores") || "[]");
-      all.push({ ...entry, at: Date.now() });
-      localStorage.setItem("av_scores", JSON.stringify(all));
-    } catch {
-      // ignore corrupt/missing localStorage, same as template
-    }
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, signOut, saveScore }}>
+    <AuthContext.Provider value={{ user, loading, signOut }}>
       {children}
     </AuthContext.Provider>
   );
